@@ -43,7 +43,7 @@ export function CurrencyListRow({
 }: CurrencyListRowProps) {
   const { dx, setDx, handlers } = useSwipeToDelete(onDelete)
   const padY = density === 'compact' ? 12 : 18
-  const inputFs = density === 'compact' ? 24 : 30
+  const inputFs = density === 'compact' ? 'clamp(18px, 5.5vw, 24px)' : 'clamp(22px, 7vw, 30px)'
 
   return (
     <div style={{
@@ -89,10 +89,10 @@ export function CurrencyListRow({
             dx === 0 || dx === -140
               ? 'transform 220ms cubic-bezier(.2,.8,.2,1)'
               : 'none',
-          padding: `${padY}px 16px`,
+          padding: `${padY}px clamp(10px, 4vw, 16px)`,
           display: 'flex',
           alignItems: 'center',
-          gap: 12,
+          gap: 'clamp(6px, 2vw, 12px)',
           touchAction: 'pan-y',
         }}
       >
@@ -123,18 +123,22 @@ export function CurrencyListRow({
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            gap: 8,
             padding: 0,
+            minWidth: 0,
+            flexShrink: 1,
+            overflow: 'hidden',
           }}
         >
-          <FlagAvatar currency={currency} size={36} showFlag={showFlag} />
-          <div style={{ textAlign: 'left' }}>
+          <FlagAvatar currency={currency} size={32} showFlag={showFlag} />
+          <div style={{ textAlign: 'left', minWidth: 0, overflow: 'hidden' }}>
             <div
               style={{
                 fontSize: 15,
                 fontWeight: 700,
                 color: 'var(--cc-text)',
                 letterSpacing: -0.2,
+                whiteSpace: 'nowrap',
               }}
             >
               {currency.code}
@@ -145,6 +149,9 @@ export function CurrencyListRow({
                 color: 'var(--cc-text-muted)',
                 lineHeight: 1.2,
                 marginTop: 1,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
               {currency.name}
@@ -154,11 +161,11 @@ export function CurrencyListRow({
 
         {/* Sparkline */}
         {sparkline && (
-          <div style={{ marginLeft: 'auto', minWidth: 0, display: 'flex', alignItems: 'center' }}>
+          <div style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <Sparkline
               data={SERIES[currency.code] ?? []}
-              width={48}
-              height={20}
+              width={40}
+              height={18}
               color="var(--cc-accent)"
             />
           </div>
@@ -199,7 +206,7 @@ export function CurrencyListRow({
               fontWeight: 600,
               color: isActive ? 'var(--cc-accent)' : 'var(--cc-text)',
               textAlign: 'right',
-              width: 'clamp(80px, 30vw, 130px)',
+              width: 'clamp(68px, 22vw, 130px)',
               padding: 0,
               letterSpacing: -0.6,
               fontVariantNumeric: 'tabular-nums',

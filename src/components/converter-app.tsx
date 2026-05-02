@@ -109,7 +109,7 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
       ) : (
         <div
           className="no-scrollbar"
-          style={{ flex: 1, overflowY: 'auto', padding: '14px 16px 120px' }}
+          style={{ flex: 1, overflowY: 'auto', padding: '14px clamp(8px, 4vw, 16px) 120px' }}
         >
           {layout === 'grid' ? (
             <div

@@ -35,12 +35,12 @@ describe('CurrencyListRow', () => {
     expect(styleAttr).not.toMatch(/width:\s*130px/)
   })
 
-  it('sparkline container has minWidth 0 when sparkline is true', () => {
+  it('sparkline container renders when sparkline is true', () => {
     const { container } = render(<CurrencyListRow {...defaultProps} sparkline={true} />)
-    // The sparkline wrapper div has margin-left: auto and min-width: 0
+    // The sparkline wrapper div has margin-left: auto and flexShrink: 0 (fixed-width sparkline)
     const sparklineWrapper = container.querySelector('[style*="margin-left: auto"]') as HTMLElement | null
     expect(sparklineWrapper).not.toBeNull()
-    expect(sparklineWrapper?.style.minWidth).toBe('0px')
+    expect(sparklineWrapper?.style.flexShrink).toBe('0')
   })
 
   it('value input container does not prevent shrinking (no flexShrink:0 alone)', () => {
