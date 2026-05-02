@@ -46,7 +46,16 @@ export function CurrencyListRow({
   const inputFs = density === 'compact' ? 24 : 30
 
   return (
-    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, background: 'var(--cc-card-solid)' }}>
+    <div style={{
+      position: 'relative',
+      overflow: 'hidden',
+      borderRadius: 22,
+      background: 'var(--cc-card-solid)',
+      border: '0.5px solid var(--cc-card-border)',
+      boxShadow: isActive
+        ? '0 0 0 2px var(--cc-accent), 0 8px 24px rgba(0,0,0,0.06)'
+        : '0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)',
+    }}>
       {/* Delete bg layer */}
       <div
         style={{
@@ -75,13 +84,10 @@ export function CurrencyListRow({
         style={{
           position: 'relative',
           background: 'var(--cc-card-solid)',
-          boxShadow: isActive
-            ? '0 0 0 2px var(--cc-accent), inset 0 0 0 0.5px var(--cc-card-border), 0 8px 24px rgba(0,0,0,0.06)'
-            : 'inset 0 0 0 0.5px var(--cc-card-border), 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)',
           transform: `translateX(${dx}px)`,
           transition:
             dx === 0 || dx === -140
-              ? 'transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 200ms'
+              ? 'transform 220ms cubic-bezier(.2,.8,.2,1)'
               : 'none',
           padding: `${padY}px 16px`,
           display: 'flex',
