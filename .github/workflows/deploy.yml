@@ -1,0 +1,84 @@
+name: Deploy
+
+on:
+  push:
+    tags: ['v*.*.*']
+  pull_request:
+    branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Lint
+        run: npm run lint -- --no-fix 2>/dev/null || npm run lint
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+        # No EXCHANGE_RATE_API_KEY — tests use mocks only
+
+  playwright-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Build app
+        run: npm run build
+        # No EXCHANGE_RATE_API_KEY — app uses MOCK_RATES fallback in build
+        # E2E tests mock /api/rates via page.route()
+      - name: Playwright E2E tests
+        run: npx playwright test
+        # No real API key — all network calls mocked via page.route()
+
+  deploy:
+    needs: [lint-and-typecheck, unit-tests, playwright-e2e]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: PROD
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Contabo
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            cd ~/currency-converter &&
+            git fetch origin &&
+            git checkout ${{ github.ref_name }} &&
+            cat > .env <<'ENVEOF'
+          EXCHANGE_RATE_API_KEY=${{ secrets.EXCHANGE_RATE_API_KEY }}
+          ENVEOF
+            docker compose -f docker-compose.prod.yml build &&
+            docker compose -f docker-compose.prod.yml up -d --force-recreate &&
+            docker image prune -f
+          "

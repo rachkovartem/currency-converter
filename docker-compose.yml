@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY:-}
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY:-}
