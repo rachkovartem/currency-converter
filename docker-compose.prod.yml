@@ -8,13 +8,13 @@ services:
     image: currency-converter:latest
     container_name: currency-converter
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       NODE_ENV: production
       EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
     volumes:
       - next-cache:/app/.next/cache
+    networks:
+      - web
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
       interval: 30s
@@ -25,3 +25,7 @@ services:
 volumes:
   next-cache:
     driver: local
+
+networks:
+  web:
+    external: true
