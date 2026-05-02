@@ -52,7 +52,6 @@ export function CurrencyListRow({
         style={{
           position: 'absolute',
           inset: 0,
-          borderRadius: 22,
           background: 'var(--cc-neg)',
           display: 'flex',
           alignItems: 'center',
@@ -75,7 +74,6 @@ export function CurrencyListRow({
         }}
         style={{
           position: 'relative',
-          borderRadius: 22,
           background: 'var(--cc-card-solid)',
           boxShadow: isActive
             ? '0 0 0 2px var(--cc-accent), inset 0 0 0 0.5px var(--cc-card-border), 0 8px 24px rgba(0,0,0,0.06)'
