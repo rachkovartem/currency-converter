@@ -154,7 +154,7 @@ export function CurrencyListRow({
 
         {/* Sparkline */}
         {sparkline && (
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+          <div style={{ marginLeft: 'auto', minWidth: 0, display: 'flex', alignItems: 'center' }}>
             <Sparkline
               data={SERIES[currency.code] ?? []}
               width={48}
@@ -199,7 +199,7 @@ export function CurrencyListRow({
               fontWeight: 600,
               color: isActive ? 'var(--cc-accent)' : 'var(--cc-text)',
               textAlign: 'right',
-              width: 130,
+              width: 'clamp(80px, 30vw, 130px)',
               padding: 0,
               letterSpacing: -0.6,
               fontVariantNumeric: 'tabular-nums',
