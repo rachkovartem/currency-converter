@@ -15,6 +15,11 @@ export interface RatesResult {
 }
 
 export async function fetchRates(): Promise<RatesResult> {
+  // Never hit the real API in development — preserve free-tier limits
+  if (process.env.NODE_ENV === 'development') {
+    return { rates: MOCK_RATES, date: new Date().toISOString().split('T')[0] }
+  }
+
   const apiKey = process.env.EXCHANGE_RATE_API_KEY
 
   if (!apiKey) {
