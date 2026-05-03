@@ -138,13 +138,14 @@ describe('CurrencyListRow', () => {
   })
 
   // Source-level check for padY values — jsdom cannot parse clamp() in padding shorthand.
-  it('source uses padY 10 for compact and 16 for comfortable (not old 12/18)', () => {
+  it('source uses padY 5 for compact and 10 for comfortable', () => {
     const src = readFileSync(
       resolve(__dirname, '../../components/currency-list-row.tsx'),
       'utf-8'
     )
-    expect(src).toContain("density === 'compact' ? 10 : 16")
+    expect(src).toContain("density === 'compact' ? 5 : 10")
     expect(src).not.toContain("density === 'compact' ? 12 : 18")
+    expect(src).not.toContain("density === 'compact' ? 10 : 16")
   })
 
   // Dynamic collapse tests using DOM-based ResizeObserver logic

@@ -1,6 +1,6 @@
 'use client'
 
-import { LayoutList, LayoutGrid, Flag } from 'lucide-react'
+import { LayoutList, LayoutGrid, Flag, Maximize2 } from 'lucide-react'
 import { useConverterStore } from '@/store/converter-store'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 
@@ -13,6 +13,8 @@ export function SettingsSheet() {
   const setLayout = useConverterStore(s => s.setLayout)
   const setDensity = useConverterStore(s => s.setDensity)
   const setShowFlags = useConverterStore(s => s.setShowFlags)
+  const focusMode = useConverterStore(s => s.focusMode)
+  const setFocusMode = useConverterStore(s => s.setFocusMode)
 
   return (
     <BottomSheet open={settingsOpen} onClose={closeSettings} height="auto">
@@ -229,6 +231,36 @@ export function SettingsSheet() {
                   transition: 'left 200ms ease',
                 }}
               />
+            </button>
+          </div>
+
+          {/* Focus Mode toggle row */}
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px 0', borderTop: '0.5px solid var(--cc-sep)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Maximize2 size={18} color="var(--cc-text-muted)" />
+              <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--cc-text)' }}>Focus Mode</span>
+            </div>
+            <button
+              data-testid="toggle-focus-mode"
+              onClick={() => setFocusMode(!focusMode)}
+              aria-pressed={focusMode}
+              aria-label="Toggle focus mode"
+              style={{
+                position: 'relative', width: 51, height: 31, borderRadius: 15.5,
+                border: 'none', background: focusMode ? 'var(--cc-accent)' : 'oklch(0.4 0 0)',
+                cursor: 'pointer', transition: 'background 200ms ease', flexShrink: 0,
+              }}
+            >
+              <div style={{
+                position: 'absolute', top: 2, left: focusMode ? 22 : 2,
+                width: 27, height: 27, borderRadius: 13.5, background: '#fff',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.25)', transition: 'left 200ms ease',
+              }} />
             </button>
           </div>
         </div>

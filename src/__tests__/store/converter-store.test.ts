@@ -201,6 +201,57 @@ describe('setOnline()', () => {
   })
 })
 
+describe('addRecentCurrency()', () => {
+  it('adds a currency to the front of recentCurrencies', () => {
+    useConverterStore.setState({ recentCurrencies: [] })
+    useConverterStore.getState().addRecentCurrency('EUR')
+    expect(useConverterStore.getState().recentCurrencies[0]).toBe('EUR')
+  })
+
+  it('deduplicates and moves existing entry to front', () => {
+    useConverterStore.setState({ recentCurrencies: ['EUR', 'GBP', 'JPY'] })
+    useConverterStore.getState().addRecentCurrency('GBP')
+    expect(useConverterStore.getState().recentCurrencies).toEqual(['GBP', 'EUR', 'JPY'])
+  })
+
+  it('limits list to 10 entries', () => {
+    const initial = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] as string[]
+    useConverterStore.setState({ recentCurrencies: initial })
+    useConverterStore.getState().addRecentCurrency('USD')
+    expect(useConverterStore.getState().recentCurrencies).toHaveLength(10)
+    expect(useConverterStore.getState().recentCurrencies[0]).toBe('USD')
+  })
+})
+
+describe('setFocusMode()', () => {
+  it('sets focusMode to true', () => {
+    useConverterStore.setState({ focusMode: false })
+    useConverterStore.getState().setFocusMode(true)
+    expect(useConverterStore.getState().focusMode).toBe(true)
+  })
+
+  it('sets focusMode to false', () => {
+    useConverterStore.setState({ focusMode: true })
+    useConverterStore.getState().setFocusMode(false)
+    expect(useConverterStore.getState().focusMode).toBe(false)
+  })
+})
+
+describe('addCurrency() with recentCurrencies', () => {
+  it('updates recentCurrencies when adding a new currency', () => {
+    useConverterStore.setState({ rows: ['USD', 'EUR'], recentCurrencies: [] })
+    useConverterStore.getState().addCurrency('CHF')
+    expect(useConverterStore.getState().recentCurrencies).toContain('CHF')
+  })
+
+  it('does not update recentCurrencies when adding a duplicate currency', () => {
+    useConverterStore.setState({ rows: ['USD', 'EUR'], recentCurrencies: ['EUR'] })
+    useConverterStore.getState().addCurrency('USD')
+    // USD is already in rows, so recentCurrencies should be unchanged
+    expect(useConverterStore.getState().recentCurrencies).toEqual(['EUR'])
+  })
+})
+
 describe('updateRates()', () => {
   it('updates rates and sets updatedAt as a number', () => {
     const before = useConverterStore.getState().updatedAt

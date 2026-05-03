@@ -40,8 +40,8 @@ export function CurrencyListRow({
   dragHandlers,
 }: CurrencyListRowProps) {
   const { dx, setDx, handlers } = useSwipeToDelete(onDelete)
-  const padY = density === 'compact' ? 10 : 16
-  const inputFs = density === 'compact' ? 'clamp(18px, 5.5vw, 24px)' : 'clamp(22px, 7vw, 30px)'
+  const padY = density === 'compact' ? 5 : 10
+  const inputFs = density === 'compact' ? 'clamp(14px, 4vw, 18px)' : 'clamp(18px, 5.5vw, 24px)'
 
   // Compute display value length to drive dynamic expansion
   const displayValue = isActive ? value : formatNumber(parseFloat(value) || 0, decimals)

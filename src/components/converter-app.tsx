@@ -1,10 +1,11 @@
 'use client'
 
 import { useMemo, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Wifi, WifiOff } from 'lucide-react'
+import { Wifi, WifiOff, Settings } from 'lucide-react'
 import { useConverterStore, ConverterStoreContext, createConverterStore, ConverterStore } from '@/store/converter-store'
 import { PersistedConverterState } from '@/lib/cookie-storage'
-import { convert, formatNumber } from '@/lib/rates'
+import { getRecentCurrencies } from '@/lib/local-storage'
+import { convert } from '@/lib/rates'
 import { CURRENCY_BY_CODE } from '@/lib/currencies'
 import { timeAgo } from '@/lib/time'
 import { useReorder } from '@/hooks/use-reorder'
@@ -64,6 +65,8 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
   const setActiveValue = useConverterStore(s => s.setActiveValue)
   const reorderRows = useConverterStore(s => s.reorderRows)
   const setOnline = useConverterStore(s => s.setOnline)
+  const focusMode = useConverterStore(s => s.focusMode)
+  const openSettings = useConverterStore(s => s.openSettings)
 
   // Sync real network connectivity to the store
   useEffect(() => {
@@ -89,6 +92,14 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
       })
     }
   }, [])
+
+  // Hydrate recentCurrencies from localStorage on mount
+  useEffect(() => {
+    const saved = getRecentCurrencies()
+    if (saved.length > 0) {
+      store.setState({ recentCurrencies: saved })
+    }
+  }, [store])
 
   const reorder = useReorder(rows, reorderRows)
 
@@ -142,7 +153,23 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
         width: '100%',
       }}
     >
-      <Header />
+      {!focusMode && <Header />}
+
+      {focusMode && (
+        <button
+          onClick={openSettings}
+          aria-label="Display settings"
+          style={{
+            position: 'fixed', top: 12, right: 12, zIndex: 10,
+            border: 'none', background: 'transparent',
+            cursor: 'pointer', opacity: 0.35,
+            color: 'var(--cc-text)',
+            width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Settings size={18} />
+        </button>
+      )}
 
       {isEmpty ? (
         <EmptyState onAdd={openPicker} />
@@ -218,29 +245,31 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
             </div>
           )}
 
-          <AddCurrencyButton />
-          <FavoritesSection />
+          {!focusMode && <AddCurrencyButton />}
+          {!focusMode && <FavoritesSection />}
 
           {/* Updated timestamp */}
-          <div
-            style={{
-              marginTop: 24,
-              textAlign: 'center',
-              fontSize: 11,
-              color: 'var(--cc-text-subtle)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-            }}
-          >
-            {online ? (
-              <Wifi size={12} />
-            ) : (
-              <WifiOff size={12} />
-            )}
-            Rates updated {timeAgo(updatedAt)}
-          </div>
+          {!focusMode && (
+            <div
+              style={{
+                marginTop: 24,
+                textAlign: 'center',
+                fontSize: 11,
+                color: 'var(--cc-text-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+              }}
+            >
+              {online ? (
+                <Wifi size={12} />
+              ) : (
+                <WifiOff size={12} />
+              )}
+              Rates updated {timeAgo(updatedAt)}
+            </div>
+          )}
         </div>
       )}
 

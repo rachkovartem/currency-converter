@@ -5,6 +5,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import { MOCK_RATES } from '@/lib/rates'
 import { CurrencyCode, RecentConversion } from '@/lib/types'
 import { cookieStorage, PersistedConverterState } from '@/lib/cookie-storage'
+import { saveRecentCurrencies } from '@/lib/local-storage'
 
 interface ConverterState {
   // Data
@@ -20,6 +21,9 @@ interface ConverterState {
   layout: 'list' | 'grid'
   density: 'compact' | 'comfortable'
   showFlags: boolean
+  focusMode: boolean
+  // Recent currencies (stored in localStorage, not cookies)
+  recentCurrencies: CurrencyCode[]
   // Overlay state (not persisted)
   pickerOpen: boolean
   historyPair: { from: CurrencyCode; to: CurrencyCode } | null
@@ -46,6 +50,8 @@ interface ConverterState {
   openSettings: () => void
   closeSettings: () => void
   setOnline: (online: boolean) => void
+  addRecentCurrency: (code: CurrencyCode) => void
+  setFocusMode: (enabled: boolean) => void
 }
 
 export function createConverterStore(initialState?: Partial<PersistedConverterState>) {
@@ -65,8 +71,10 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         updatedAt: Date.now(),
         online: true,
         layout: 'list',
-        density: 'compact',
+        density: 'comfortable',
         showFlags: true,
+        focusMode: false,
+        recentCurrencies: [],
         pickerOpen: false,
         historyPair: null,
         showRecents: false,
@@ -74,8 +82,10 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         ...(initialState ?? {}),
 
         addCurrency: (code) => set((state) => {
-          if (state.rows.includes(code)) return state
-          return { rows: [...state.rows, code], pickerOpen: false }
+          if (state.rows.includes(code)) return { ...state, pickerOpen: false }
+          const updatedRecents = [code, ...state.recentCurrencies.filter(c => c !== code)].slice(0, 10)
+          saveRecentCurrencies(updatedRecents)
+          return { rows: [...state.rows, code], pickerOpen: false, recentCurrencies: updatedRecents }
         }),
         removeCurrency: (code) => set((state) => {
           if (state.rows.length <= 1) return state
@@ -106,6 +116,12 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         openSettings: () => set({ settingsOpen: true }),
         closeSettings: () => set({ settingsOpen: false }),
         setOnline: (online) => set({ online }),
+        addRecentCurrency: (code) => set((state) => {
+          const updated = [code, ...state.recentCurrencies.filter(c => c !== code)].slice(0, 10)
+          saveRecentCurrencies(updated)
+          return { recentCurrencies: updated }
+        }),
+        setFocusMode: (focusMode) => set({ focusMode }),
         pickRecent: (recent) => set((state) => {
           const rows = [...state.rows]
           if (!rows.includes(recent.from)) rows.push(recent.from)
@@ -125,8 +141,8 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         partialize: (state) => {
           const persistedKeys: (keyof ConverterState)[] = [
             'rows', 'activeCode', 'activeValue', 'favorites', 'recents',
-            'layout', 'density', 'showFlags',
-            // settingsOpen, pickerOpen, historyPair, showRecents are NOT persisted
+            'layout', 'density', 'showFlags', 'focusMode',
+            // settingsOpen, pickerOpen, historyPair, showRecents, recentCurrencies are NOT persisted here
           ]
           return Object.fromEntries(
             persistedKeys.map(k => [k, state[k]])

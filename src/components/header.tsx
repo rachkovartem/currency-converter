@@ -15,7 +15,7 @@ export function Header() {
     : null
 
   return (
-    <div style={{ padding: '52px 12px 4px' }}>
+    <div style={{ padding: '16px 12px 4px' }}>
       <div
         style={{
           display: 'flex',

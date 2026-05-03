@@ -188,4 +188,18 @@ describe('ConverterApp', () => {
       expect(eurInput.value).toContain('.')
     })
   })
+
+  it('hides Header when focusMode is true', async () => {
+    render(<ConverterApp {...defaultProps} initialState={{ focusMode: true }} />)
+    await waitFor(() => {
+      expect(screen.queryByText('Convert')).toBeNull()
+    })
+  })
+
+  it('shows Header when focusMode is false', async () => {
+    render(<ConverterApp {...defaultProps} initialState={{ focusMode: false }} />)
+    await waitFor(() => {
+      expect(screen.getByText('Convert')).toBeTruthy()
+    })
+  })
 })
