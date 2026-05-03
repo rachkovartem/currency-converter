@@ -1,6 +1,8 @@
 import { ConverterApp } from '@/components/converter-app'
 import { fetchRates } from '@/lib/exchange-rate-api'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
   title: 'Convert — Currency Converter | Live Exchange Rates',
   description:

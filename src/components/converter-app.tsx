@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect, useLayoutEffect, useRef } from 'react'
 import { Wifi, WifiOff } from 'lucide-react'
-import { useConverterStore, useHasHydrated } from '@/store/converter-store'
+import { useConverterStore } from '@/store/converter-store'
 import { convert, formatNumber } from '@/lib/rates'
 import { CURRENCY_BY_CODE } from '@/lib/currencies'
 import { timeAgo } from '@/lib/time'
@@ -30,8 +30,6 @@ interface ConverterAppProps {
 }
 
 export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
-  const hasHydrated = useHasHydrated()
-
   // Capture initial SSR rates in a ref so we can use it in the effect
   // without triggering re-runs on re-renders (rates are daily, SSR-only)
   const initialRatesRef = useRef(initialRates)
@@ -39,13 +37,6 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
   // Initialize store with SSR rates on first mount
   useEffect(() => {
     useConverterStore.setState({ rates: initialRatesRef.current, updatedAt: Date.now() })
-  }, [])
-
-  // Ensure app renders after client mount. _hasHydrated is set by onRehydrateStorage
-  // in the persist middleware, but we also set it here as a fallback after mount
-  // to handle the case where the callback fires before React re-renders.
-  useEffect(() => {
-    useConverterStore.setState({ _hasHydrated: true })
   }, [])
 
   const rows = useConverterStore(s => s.rows)
@@ -94,10 +85,6 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
     const v = valueFor(code)
     setActiveRow(code)
     setActiveValue(formatNumber(parseFloat(v) || 0, decimals(code)).replace(/,/g, ''))
-  }
-
-  if (!hasHydrated) {
-    return <div style={{ background: '#08080C', minHeight: '100dvh' }} />
   }
 
   const isEmpty = rows.length === 0
