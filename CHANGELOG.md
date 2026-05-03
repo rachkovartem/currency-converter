@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) · Versioning: 
 
 ---
 
+## [1.2.1] — 2026-05-03
+
+### Fixed
+- **iOS safe area** — header top padding respects `env(safe-area-inset-top)`; FloatingSwapPill and focus-mode buttons respect `env(safe-area-inset-bottom)`; content no longer hidden under the status bar when installed as a PWA
+- **Input focus shows formatted value** — active input displays the rounded value (e.g. "3.06") on focus/select instead of the full-precision internal value ("3.0636"); raw value shown only while typing
+
+---
+
 ## [1.2.0] — 2026-05-03
 
 ### Added
