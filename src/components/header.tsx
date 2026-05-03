@@ -24,7 +24,7 @@ export function Header({ ratesDate }: HeaderProps) {
     : null
 
   return (
-    <div style={{ padding: '56px 20px 8px' }}>
+    <div style={{ padding: '52px 12px 4px' }}>
       <div
         style={{
           display: 'flex',

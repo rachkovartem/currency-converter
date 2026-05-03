@@ -42,8 +42,18 @@ export function CurrencyListRow({
   dragHandlers,
 }: CurrencyListRowProps) {
   const { dx, setDx, handlers } = useSwipeToDelete(onDelete)
-  const padY = density === 'compact' ? 12 : 18
+  const padY = density === 'compact' ? 10 : 16
   const inputFs = density === 'compact' ? 'clamp(18px, 5.5vw, 24px)' : 'clamp(22px, 7vw, 30px)'
+
+  // Compute display value length to drive dynamic expansion
+  const displayValue = isActive ? value : formatNumber(parseFloat(value) || 0, decimals)
+  const len = displayValue.length
+
+  // Dynamic font size: shrink for very long numbers
+  const valueFontSize =
+    len > 14 ? 'clamp(13px, 3.8vw, 17px)' :
+    len > 10 ? 'clamp(15px, 4.5vw, 20px)' :
+    inputFs
 
   return (
     <div style={{
@@ -89,14 +99,14 @@ export function CurrencyListRow({
             dx === 0 || dx === -140
               ? 'transform 220ms cubic-bezier(.2,.8,.2,1)'
               : 'none',
-          padding: `${padY}px clamp(10px, 4vw, 16px)`,
+          padding: `${padY}px clamp(8px, 3vw, 14px)`,
           display: 'flex',
           alignItems: 'center',
-          gap: 'clamp(6px, 2vw, 12px)',
+          gap: 'clamp(4px, 1.5vw, 10px)',
           touchAction: 'pan-y',
         }}
       >
-        {/* Drag handle */}
+        {/* Drag handle — always visible */}
         <div
           {...(dragHandlers ?? {})}
           style={{
@@ -130,8 +140,19 @@ export function CurrencyListRow({
             overflow: 'hidden',
           }}
         >
-          <FlagAvatar currency={currency} size={32} showFlag={showFlag} />
+          {/* Flag avatar wrapper — collapses at level 2 (len ≥ 12) */}
+          <div style={{
+            maxWidth: len >= 12 ? 0 : 40,
+            overflow: 'hidden',
+            opacity: len >= 12 ? 0 : 1,
+            flexShrink: 0,
+            transition: 'max-width 180ms ease, opacity 140ms ease',
+          }}>
+            <FlagAvatar currency={currency} size={32} showFlag={showFlag} />
+          </div>
+
           <div style={{ textAlign: 'left', minWidth: 0, overflow: 'hidden' }}>
+            {/* Currency code — always visible */}
             <div
               style={{
                 fontSize: 15,
@@ -143,6 +164,7 @@ export function CurrencyListRow({
             >
               {currency.code}
             </div>
+            {/* Currency name — collapses at level 1 (len ≥ 8) */}
             <div
               style={{
                 fontSize: 11,
@@ -152,6 +174,9 @@ export function CurrencyListRow({
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                maxWidth: len >= 8 ? 0 : 120,
+                opacity: len >= 8 ? 0 : 1,
+                transition: 'max-width 180ms ease, opacity 140ms ease',
               }}
             >
               {currency.name}
@@ -159,9 +184,18 @@ export function CurrencyListRow({
           </div>
         </button>
 
-        {/* Sparkline */}
+        {/* Sparkline wrapper — collapses at level 2 (len ≥ 12) */}
         {sparkline && (
-          <div style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+          <div style={{
+            marginLeft: 'auto',
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            maxWidth: len >= 12 ? 0 : 48,
+            overflow: 'hidden',
+            opacity: len >= 12 ? 0 : 1,
+            transition: 'max-width 180ms ease, opacity 140ms ease',
+          }}>
             <Sparkline
               data={SERIES[currency.code] ?? []}
               width={40}
@@ -171,12 +205,14 @@ export function CurrencyListRow({
           </div>
         )}
 
-        {/* Value input */}
+        {/* Value input — flex:1 to grow into freed space */}
         <div
           style={{
-            marginLeft: sparkline ? 8 : 'auto',
+            marginLeft: (sparkline && len < 12) ? 8 : 'auto',
             flexShrink: 0,
             textAlign: 'right',
+            flex: 1,
+            minWidth: 0,
           }}
         >
           <div
@@ -202,11 +238,11 @@ export function CurrencyListRow({
               outline: 'none',
               background: 'transparent',
               fontFamily: 'inherit',
-              fontSize: inputFs,
+              fontSize: valueFontSize,
               fontWeight: 600,
               color: isActive ? 'var(--cc-accent)' : 'var(--cc-text)',
               textAlign: 'right',
-              width: 'clamp(68px, 22vw, 130px)',
+              width: '100%',
               padding: 0,
               letterSpacing: -0.6,
               fontVariantNumeric: 'tabular-nums',

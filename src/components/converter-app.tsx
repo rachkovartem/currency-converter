@@ -109,12 +109,12 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
       ) : (
         <div
           className="no-scrollbar"
-          style={{ flex: 1, overflowY: 'auto', padding: '14px clamp(8px, 4vw, 16px) 120px' }}
+          style={{ flex: 1, overflowY: 'auto', padding: '8px clamp(6px, 3vw, 12px) 100px' }}
         >
           {layout === 'grid' ? (
             <div
               data-testid="currency-rows-container"
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}
             >
               {rows.map((code, idx) => {
                 const c = CURRENCY_BY_CODE[code]
@@ -143,7 +143,7 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
           ) : (
             <div
               data-testid="currency-rows-container"
-              style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
+              style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
             >
               {rows.map((code, idx) => {
                 const c = CURRENCY_BY_CODE[code]
