@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Wifi, WifiOff, Settings } from 'lucide-react'
+import { Wifi, WifiOff, Settings, History } from 'lucide-react'
 import { useConverterStore, ConverterStoreContext, createConverterStore, ConverterStore } from '@/store/converter-store'
 import { PersistedConverterState } from '@/lib/cookie-storage'
 import { getRecentCurrencies } from '@/lib/local-storage'
@@ -67,6 +67,7 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
   const setOnline = useConverterStore(s => s.setOnline)
   const focusMode = useConverterStore(s => s.focusMode)
   const openSettings = useConverterStore(s => s.openSettings)
+  const openRecents = useConverterStore(s => s.openRecents)
 
   // Sync real network connectivity to the store
   useEffect(() => {
@@ -156,19 +157,35 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
       {!focusMode && <Header />}
 
       {focusMode && (
-        <button
-          onClick={openSettings}
-          aria-label="Display settings"
+        <div
           style={{
-            position: 'fixed', top: 12, right: 12, zIndex: 10,
-            border: 'none', background: 'transparent',
-            cursor: 'pointer', opacity: 0.35,
-            color: 'var(--cc-text)',
-            width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 10, display: 'flex', gap: 8,
           }}
         >
-          <Settings size={18} />
-        </button>
+          <button
+            onClick={openRecents}
+            aria-label="Recent conversions"
+            style={{
+              border: 'none', background: 'var(--cc-chip)',
+              cursor: 'pointer', width: 36, height: 36, borderRadius: 18,
+              color: 'var(--cc-text)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <History size={17} />
+          </button>
+          <button
+            onClick={openSettings}
+            aria-label="Display settings"
+            style={{
+              border: 'none', background: 'var(--cc-chip)',
+              cursor: 'pointer', width: 36, height: 36, borderRadius: 18,
+              color: 'var(--cc-text)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Settings size={17} />
+          </button>
+        </div>
       )}
 
       {isEmpty ? (
