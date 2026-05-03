@@ -49,12 +49,18 @@ test.describe('Converter — Main Features', () => {
     expect(fontSize).toBe('24px')
   })
 
-  test('AC-2: grid layout setting is persisted to localStorage', async ({ page }) => {
-    // Set layout to grid via store
+  test('AC-2: grid layout setting is persisted via cookie', async ({ page }) => {
+    // Store persists via cookies (cookieStorage), not localStorage
     await page.evaluate(() => {
-      const store = JSON.parse(localStorage.getItem('currency-converter') ?? '{}')
-      store.state = { ...(store.state ?? {}), layout: 'grid' }
-      localStorage.setItem('currency-converter', JSON.stringify(store))
+      const name = 'currency-converter'
+      const existing = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(name + '='))
+      const raw = existing
+        ? JSON.parse(decodeURIComponent(existing.split('=').slice(1).join('=')))
+        : {}
+      raw.state = { ...(raw.state ?? {}), layout: 'grid' }
+      document.cookie = `${name}=${encodeURIComponent(JSON.stringify(raw))}; path=/; max-age=31536000`
     })
     await page.reload()
     await page.waitForSelector('[data-testid="currency-input-USD"]')
