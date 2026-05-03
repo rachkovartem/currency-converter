@@ -17,7 +17,6 @@ beforeEach(() => {
     rows: ['USD', 'EUR', 'GBP', 'JPY'],
     pickerOpen: true,
     showFlags: true,
-    _hasHydrated: true,
   })
 })
 

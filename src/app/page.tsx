@@ -1,5 +1,6 @@
 import { ConverterApp } from '@/components/converter-app'
 import { fetchRates } from '@/lib/exchange-rate-api'
+import { getServerConverterCookieState } from '@/lib/cookie-storage'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,6 +12,7 @@ export const metadata = {
 
 export default async function Page() {
   const { rates: initialRates, date: ratesDate } = await fetchRates()
+  const cookieState = await getServerConverterCookieState()
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -31,6 +33,15 @@ export default async function Page() {
         flexDirection: 'column',
       }}
     >
+      {cookieState && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__CC_STATE__=${JSON.stringify(cookieState)
+              .replace(/</g, '\\u003c')
+              .replace(/>/g, '\\u003e')}`
+          }}
+        />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

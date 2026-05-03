@@ -17,7 +17,6 @@ beforeEach(() => {
     historyPair: null,
     showRecents: false,
     settingsOpen: false,
-    _hasHydrated: false,
   })
 })
 
@@ -32,9 +31,9 @@ describe('initial state', () => {
     expect(density).toBe('compact')
   })
 
-  it('_hasHydrated starts false', () => {
-    const { _hasHydrated } = useConverterStore.getState()
-    expect(_hasHydrated).toBe(false)
+  it('_hasHydrated does not exist on state', () => {
+    const state = useConverterStore.getState()
+    expect('_hasHydrated' in state).toBe(false)
   })
 
   it('updatedAt is a number (not Date)', () => {

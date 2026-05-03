@@ -1,7 +1,8 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import { MOCK_RATES } from '@/lib/rates'
 import { CurrencyCode, RecentConversion } from '@/lib/types'
+import { cookieStorage } from '@/lib/cookie-storage'
 
 interface ConverterState {
   // Data
@@ -23,7 +24,6 @@ interface ConverterState {
   historyPair: { from: CurrencyCode; to: CurrencyCode } | null
   showRecents: boolean
   settingsOpen: boolean
-  _hasHydrated: boolean
   // Actions
   addCurrency: (code: CurrencyCode) => void
   removeCurrency: (code: CurrencyCode) => void
@@ -45,6 +45,24 @@ interface ConverterState {
   pickRecent: (recent: RecentConversion) => void
   openSettings: () => void
   closeSettings: () => void
+}
+
+type PersistedConverterState = {
+  rows: CurrencyCode[]
+  activeCode: CurrencyCode
+  activeValue: string
+  favorites: CurrencyCode[]
+  recents: RecentConversion[]
+  layout: 'list' | 'grid'
+  density: 'compact' | 'comfortable'
+  showFlags: boolean
+  sparklines: boolean
+}
+
+function getInitialPersistedState(): Partial<PersistedConverterState> {
+  if (typeof window === 'undefined') return {}
+  const s = (window as Window & { __CC_STATE__?: Partial<PersistedConverterState> }).__CC_STATE__
+  return s ?? {}
 }
 
 export const useConverterStore = create<ConverterState>()(
@@ -70,7 +88,7 @@ export const useConverterStore = create<ConverterState>()(
       historyPair: null,
       showRecents: false,
       settingsOpen: false,
-      _hasHydrated: false,
+      ...getInitialPersistedState(),
 
       addCurrency: (code) => set((state) => {
         if (state.rows.includes(code)) return state
@@ -119,23 +137,18 @@ export const useConverterStore = create<ConverterState>()(
     }),
     {
       name: 'currency-converter',
+      storage: createJSONStorage(() => cookieStorage),
+      skipHydration: true,
       partialize: (state) => {
         const persistedKeys: (keyof ConverterState)[] = [
           'rows', 'activeCode', 'activeValue', 'favorites', 'recents',
           'layout', 'density', 'showFlags', 'sparklines',
-          // settingsOpen, pickerOpen, historyPair, showRecents, _hasHydrated are NOT persisted
+          // settingsOpen, pickerOpen, historyPair, showRecents are NOT persisted
         ]
         return Object.fromEntries(
           persistedKeys.map(k => [k, state[k]])
         ) as Pick<ConverterState, typeof persistedKeys[number]>
       },
-      onRehydrateStorage: () => {
-        return () => {
-          useConverterStore.setState({ _hasHydrated: true })
-        }
-      },
     }
   )
 )
-
-export const useHasHydrated = () => useConverterStore((s) => s._hasHydrated)

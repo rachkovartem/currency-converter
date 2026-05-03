@@ -56,7 +56,6 @@ const defaultState = {
   historyPair: null,
   showRecents: false,
   settingsOpen: false,
-  _hasHydrated: false,
 }
 
 beforeEach(() => {
@@ -69,20 +68,12 @@ const defaultProps = {
 }
 
 describe('ConverterApp', () => {
-  it('shows skeleton (empty dark div) on first render when not hydrated', () => {
-    // Before useEffect runs, _hasHydrated is false, showing skeleton
-    // We test the initial synchronous render
+  it('renders the component on first render', () => {
     const { container } = render(<ConverterApp {...defaultProps} />)
-    // The skeleton div is rendered before effects run
-    // After act(), useEffect fires and sets _hasHydrated=true
-    // But the test checks pre-effect state via container before rerender
-    const initialChild = container.firstChild as HTMLElement
-    // The skeleton has a dark background
-    expect(initialChild).toBeTruthy()
+    expect(container.firstChild).toBeTruthy()
   })
 
-  it('renders "Convert" title after hydration', async () => {
-    useConverterStore.setState({ _hasHydrated: true })
+  it('renders "Convert" title', async () => {
     render(<ConverterApp {...defaultProps} />)
     await waitFor(() => {
       expect(screen.getByText('Convert')).toBeTruthy()
@@ -90,7 +81,6 @@ describe('ConverterApp', () => {
   })
 
   it('shows 4 default currency rows when hydrated', async () => {
-    useConverterStore.setState({ _hasHydrated: true })
     render(<ConverterApp {...defaultProps} />)
     await waitFor(() => {
       expect(screen.getByTestId('currency-input-USD')).toBeTruthy()
@@ -101,7 +91,7 @@ describe('ConverterApp', () => {
   })
 
   it('shows empty state when rows is empty', async () => {
-    useConverterStore.setState({ _hasHydrated: true, rows: [] })
+    useConverterStore.setState({ rows: [] })
     render(<ConverterApp {...defaultProps} />)
     await waitFor(() => {
       expect(screen.getByText('Add your first currency')).toBeTruthy()
@@ -109,7 +99,6 @@ describe('ConverterApp', () => {
   })
 
   it('universal sync: typing in one field updates the displayed value for others', async () => {
-    useConverterStore.setState({ _hasHydrated: true })
     render(<ConverterApp {...defaultProps} />)
 
     await waitFor(() => {
@@ -138,7 +127,6 @@ describe('ConverterApp', () => {
 
   it('initializes store rates from initialRates prop on mount', async () => {
     const customRates = { ...defaultState.rates, EUR: 0.9999 }
-    useConverterStore.setState({ _hasHydrated: true })
     render(<ConverterApp initialRates={customRates} ratesDate="2026-05-02" />)
     await waitFor(() => {
       expect(useConverterStore.getState().rates.EUR).toBe(0.9999)
@@ -147,7 +135,6 @@ describe('ConverterApp', () => {
 
   it('uses decimals=0 for JPY (zero-decimal currency)', async () => {
     // With USD active at 100, JPY should display as a whole number (no fractional digits)
-    useConverterStore.setState({ _hasHydrated: true })
     render(<ConverterApp {...defaultProps} />)
 
     await waitFor(() => {
@@ -160,7 +147,7 @@ describe('ConverterApp', () => {
 
   it('uses decimals=2 for EUR (standard currency)', async () => {
     // EUR should be allowed to display fractional digits
-    useConverterStore.setState({ _hasHydrated: true, activeValue: '100.55', activeCode: 'USD' })
+    useConverterStore.setState({ activeValue: '100.55', activeCode: 'USD' })
     render(<ConverterApp {...defaultProps} />)
 
     await waitFor(() => {
