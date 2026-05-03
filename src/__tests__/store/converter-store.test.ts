@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { useConverterStore } from '@/store/converter-store'
+import { useConverterStore, createConverterStore, ConverterStoreContext } from '@/store/converter-store'
 
 // Reset store before each test
 beforeEach(() => {
@@ -144,6 +144,58 @@ describe('openSettings() / closeSettings()', () => {
     useConverterStore.setState({ settingsOpen: true })
     useConverterStore.getState().closeSettings()
     expect(useConverterStore.getState().settingsOpen).toBe(false)
+  })
+})
+
+describe('createConverterStore() factory', () => {
+  it('creates an independent store instance', () => {
+    const store = createConverterStore()
+    // The factory store is independent from _defaultStore
+    store.setState({ activeCode: 'GBP' })
+    // _defaultStore was reset to USD in beforeEach
+    expect(useConverterStore.getState().activeCode).toBe('USD')
+    expect(store.getState().activeCode).toBe('GBP')
+  })
+
+  it('applies initialState overrides over defaults', () => {
+    const store = createConverterStore({ rows: ['CHF', 'NOK'], activeCode: 'CHF', layout: 'grid' })
+    const state = store.getState()
+    expect(state.rows).toEqual(['CHF', 'NOK'])
+    expect(state.activeCode).toBe('CHF')
+    expect(state.layout).toBe('grid')
+    // Defaults that were not overridden remain
+    expect(state.activeValue).toBe('100')
+  })
+
+  it('works with empty initialState', () => {
+    const store = createConverterStore()
+    expect(store.getState().rows).toEqual(['USD', 'EUR', 'GBP', 'JPY'])
+  })
+
+  it('works with partial initialState', () => {
+    const store = createConverterStore({ activeValue: '999' })
+    expect(store.getState().activeValue).toBe('999')
+    expect(store.getState().rows).toEqual(['USD', 'EUR', 'GBP', 'JPY'])
+  })
+})
+
+describe('ConverterStoreContext', () => {
+  it('is exported and not null', () => {
+    expect(ConverterStoreContext).toBeTruthy()
+  })
+})
+
+describe('useConverterStore static methods (backward-compat)', () => {
+  it('has setState', () => {
+    expect(typeof useConverterStore.setState).toBe('function')
+  })
+
+  it('has getState', () => {
+    expect(typeof useConverterStore.getState).toBe('function')
+  })
+
+  it('has subscribe', () => {
+    expect(typeof useConverterStore.subscribe).toBe('function')
   })
 })
 

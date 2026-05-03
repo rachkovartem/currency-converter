@@ -73,6 +73,34 @@ describe('ConverterApp', () => {
     expect(container.firstChild).toBeTruthy()
   })
 
+  it('uses initialState prop to set initial rows (SSR personalisation)', async () => {
+    render(
+      <ConverterApp
+        initialRates={defaultState.rates}
+        ratesDate="2026-05-02"
+        initialState={{ rows: ['CHF', 'NOK', 'AUD'], activeCode: 'CHF' }}
+      />
+    )
+    await waitFor(() => {
+      expect(screen.getByTestId('currency-input-CHF')).toBeTruthy()
+      expect(screen.getByTestId('currency-input-NOK')).toBeTruthy()
+      expect(screen.getByTestId('currency-input-AUD')).toBeTruthy()
+    })
+  })
+
+  it('renders with null initialState gracefully', async () => {
+    render(
+      <ConverterApp
+        initialRates={defaultState.rates}
+        ratesDate="2026-05-02"
+        initialState={null}
+      />
+    )
+    await waitFor(() => {
+      expect(screen.getByTestId('currency-input-USD')).toBeTruthy()
+    })
+  })
+
   it('renders "Convert" title', async () => {
     render(<ConverterApp {...defaultProps} />)
     await waitFor(() => {
@@ -91,8 +119,7 @@ describe('ConverterApp', () => {
   })
 
   it('shows empty state when rows is empty', async () => {
-    useConverterStore.setState({ rows: [] })
-    render(<ConverterApp {...defaultProps} />)
+    render(<ConverterApp {...defaultProps} initialState={{ rows: [] }} />)
     await waitFor(() => {
       expect(screen.getByText('Add your first currency')).toBeTruthy()
     })
@@ -126,10 +153,15 @@ describe('ConverterApp', () => {
   })
 
   it('initializes store rates from initialRates prop on mount', async () => {
+    // With the per-request store pattern, ConverterApp creates its own isolated store.
+    // We verify rate initialization by checking the rendered conversion value for EUR.
+    // With EUR rate = 0.9999 and active USD = 100, EUR displays ~99.99
     const customRates = { ...defaultState.rates, EUR: 0.9999 }
     render(<ConverterApp initialRates={customRates} ratesDate="2026-05-02" />)
     await waitFor(() => {
-      expect(useConverterStore.getState().rates.EUR).toBe(0.9999)
+      const eurInput = screen.getByTestId('currency-input-EUR') as HTMLInputElement
+      // 100 USD * 0.9999 = 99.99 EUR — the value must be close to 99.99 not 92
+      expect(parseFloat(eurInput.value.replace(/,/g, ''))).toBeGreaterThan(99)
     })
   })
 
@@ -147,8 +179,8 @@ describe('ConverterApp', () => {
 
   it('uses decimals=2 for EUR (standard currency)', async () => {
     // EUR should be allowed to display fractional digits
-    useConverterStore.setState({ activeValue: '100.55', activeCode: 'USD' })
-    render(<ConverterApp {...defaultProps} />)
+    // Pass initialState so the per-request store starts with activeValue='100.55'
+    render(<ConverterApp {...defaultProps} initialState={{ activeValue: '100.55', activeCode: 'USD' }} />)
 
     await waitFor(() => {
       const eurInput = screen.getByTestId('currency-input-EUR') as HTMLInputElement

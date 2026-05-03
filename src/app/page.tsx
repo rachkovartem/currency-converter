@@ -33,20 +33,11 @@ export default async function Page() {
         flexDirection: 'column',
       }}
     >
-      {cookieState && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.__CC_STATE__=${JSON.stringify(cookieState)
-              .replace(/</g, '\\u003c')
-              .replace(/>/g, '\\u003e')}`
-          }}
-        />
-      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ConverterApp initialRates={initialRates} ratesDate={ratesDate} />
+      <ConverterApp initialRates={initialRates} ratesDate={ratesDate} initialState={cookieState} />
     </main>
   )
 }

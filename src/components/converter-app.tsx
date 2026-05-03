@@ -1,8 +1,9 @@
 'use client'
 
-import { useMemo, useEffect, useLayoutEffect, useRef } from 'react'
+import { useMemo, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Wifi, WifiOff } from 'lucide-react'
-import { useConverterStore } from '@/store/converter-store'
+import { useConverterStore, ConverterStoreContext, createConverterStore, ConverterStore } from '@/store/converter-store'
+import { PersistedConverterState } from '@/lib/cookie-storage'
 import { convert, formatNumber } from '@/lib/rates'
 import { CURRENCY_BY_CODE } from '@/lib/currencies'
 import { timeAgo } from '@/lib/time'
@@ -27,17 +28,26 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
 interface ConverterAppProps {
   initialRates: Record<string, number>
   ratesDate: string
+  initialState?: Partial<PersistedConverterState> | null
 }
 
-export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
+interface ConverterAppInnerProps {
+  initialRates: Record<string, number>
+  ratesDate: string
+  store: ConverterStore
+}
+
+// Inner component: all hooks run inside the Provider, so useConverterStore
+// correctly reads from the per-request store via ConverterStoreContext.
+function ConverterAppInner({ initialRates, ratesDate, store }: ConverterAppInnerProps) {
   // Capture initial SSR rates in a ref so we can use it in the effect
   // without triggering re-runs on re-renders (rates are daily, SSR-only)
   const initialRatesRef = useRef(initialRates)
 
   // Initialize store with SSR rates on first mount
   useEffect(() => {
-    useConverterStore.setState({ rates: initialRatesRef.current, updatedAt: Date.now() })
-  }, [])
+    store.setState({ rates: initialRatesRef.current, updatedAt: Date.now() })
+  }, [store])
 
   const rows = useConverterStore(s => s.rows)
   const activeCode = useConverterStore(s => s.activeCode)
@@ -213,5 +223,24 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
       <RecentsOverlay />
       <SettingsSheet />
     </div>
+  )
+}
+
+// Outer component: creates the per-request store and provides it via context.
+// ConverterAppInner renders inside the Provider so its useConverterStore hooks
+// correctly read from the per-request store rather than the module-level default.
+export function ConverterApp({ initialRates, ratesDate, initialState }: ConverterAppProps) {
+  // Create a per-request store seeded with the server-provided cookie state.
+  // useState lazy initialiser runs once and is safe to read during render.
+  const [store] = useState<ConverterStore>(() => createConverterStore(initialState ?? undefined))
+
+  return (
+    <ConverterStoreContext.Provider value={store}>
+      <ConverterAppInner
+        initialRates={initialRates}
+        ratesDate={ratesDate}
+        store={store}
+      />
+    </ConverterStoreContext.Provider>
   )
 }
