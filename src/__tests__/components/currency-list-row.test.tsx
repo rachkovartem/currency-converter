@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
-import { render } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import { CurrencyListRow } from '@/components/currency-list-row'
 import { CURRENCY_BY_CODE } from '@/lib/currencies'
 
@@ -230,5 +230,62 @@ describe('CurrencyListRow', () => {
     ).filter(el => el.style.maxWidth === '0px')
     // At collapseLevel=2: name + flag collapsed
     expect(collapsed.length).toBeGreaterThanOrEqual(2)
+  })
+
+  // isTyping behaviour tests
+  it('active input shows formatted value on focus (before typing)', () => {
+    // value "3.0636" with decimals=2 → should display "3.06", not "3.0636"
+    const { getByTestId } = render(
+      <CurrencyListRow {...defaultProps} value="3.0636" isActive={true} decimals={2} />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    // Before typing, active input must show formatted value
+    expect(input.value).toBe('3.06')
+  })
+
+  it('active input shows raw value only after typing begins', () => {
+    const { getByTestId } = render(
+      <CurrencyListRow {...defaultProps} value="3.0636" isActive={true} decimals={2} />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '5' } })
+    // After typing, raw value should pass through to onChange (isTyping=true)
+    expect(defaultProps.onChange).toHaveBeenCalledWith('5')
+  })
+
+  it('active input resets to formatted value after blur', () => {
+    const { getByTestId } = render(
+      <CurrencyListRow {...defaultProps} value="3.0636" isActive={true} decimals={2} />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '5' } })
+    fireEvent.blur(input)
+    // After blur, back to formatted
+    expect(input.value).toBe('3.06')
+  })
+
+  it('inactive input always shows formatted value', () => {
+    const { getByTestId } = render(
+      <CurrencyListRow {...defaultProps} value="3.0636" isActive={false} decimals={2} />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    expect(input.value).toBe('3.06')
+  })
+
+  it('isTyping resets when isActive becomes false', () => {
+    const { getByTestId, rerender } = render(
+      <CurrencyListRow {...defaultProps} value="3.0636" isActive={true} decimals={2} />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '5' } })
+
+    // Now deactivate: isActive=false → isTyping resets
+    rerender(
+      <CurrencyListRow {...defaultProps} value="3.0636" isActive={false} decimals={2} />
+    )
+    expect(input.value).toBe('3.06')
   })
 })

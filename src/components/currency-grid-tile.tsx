@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { GripVertical } from 'lucide-react'
 import { Currency } from '@/lib/types'
 import { FlagAvatar } from '@/components/ui/flag-avatar'
@@ -34,6 +35,11 @@ export function CurrencyGridTile({
   density = 'comfortable',
   dragHandlers,
 }: CurrencyGridTileProps) {
+  const [isTyping, setIsTyping] = useState(false)
+  useEffect(() => {
+    if (!isActive) setIsTyping(false)
+  }, [isActive])
+
   const isCompact = density === 'compact'
   return (
     <div
@@ -87,12 +93,17 @@ export function CurrencyGridTile({
 
       <input
         data-testid={`currency-input-${currency.code}`}
-        value={isActive ? value : formatNumber(parseFloat(value) || 0, decimals)}
+        value={isActive && isTyping ? value : formatNumber(parseFloat(value) || 0, decimals)}
         onFocus={(e) => {
+          setIsTyping(false)
           onFocus()
           setTimeout(() => e.target.select(), 0)
         }}
-        onChange={(e) => onChange(e.target.value.replace(/[^\d.]/g, ''))}
+        onChange={(e) => {
+          setIsTyping(true)
+          onChange(e.target.value.replace(/[^\d.]/g, ''))
+        }}
+        onBlur={() => setIsTyping(false)}
         inputMode="decimal"
         placeholder="0"
         style={{
