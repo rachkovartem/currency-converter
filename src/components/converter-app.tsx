@@ -6,7 +6,6 @@ import { useConverterStore, useHasHydrated } from '@/store/converter-store'
 import { convert, formatNumber } from '@/lib/rates'
 import { CURRENCY_BY_CODE } from '@/lib/currencies'
 import { timeAgo } from '@/lib/time'
-import { useRates } from '@/hooks/use-rates'
 import { useReorder } from '@/hooks/use-reorder'
 import { Header } from '@/components/header'
 import { CurrencyListRow } from '@/components/currency-list-row'
@@ -31,8 +30,6 @@ interface ConverterAppProps {
 }
 
 export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
-  useRates()
-
   const hasHydrated = useHasHydrated()
 
   // Capture initial SSR rates in a ref so we can use it in the effect
