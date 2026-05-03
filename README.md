@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Currency Converter
 
-## Getting Started
+A mobile-first PWA currency converter built with Next.js 16, React 19 and Zustand.  
+Live rates via [Frankfurter / ECB](https://www.frankfurter.app/). Works offline.
 
-First, run the development server:
+## Features
+
+- **160+ currencies** with emoji flags
+- **List & Grid layouts** with drag-and-drop reordering
+- **Compact / Standard density** modes
+- **Focus Mode** — hides all UI chrome, leaves only the currency tiles
+- **Recent currencies** — last 10 picks stored in localStorage
+- **Favourites** section with rate sparklines
+- **PWA** — installable, offline-capable via service worker
+- **SSR personalisation** — cookie-persisted state renders correctly on the server
+- **Dark glassmorphism** UI
+
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, inline styles, framer-motion |
+| State | Zustand 5 (cookie-persisted) |
+| Icons | lucide-react |
+| Rates API | Frankfurter (ECB, daily) |
+| Tests | Vitest + Testing Library (unit) · Playwright (E2E) |
+| PWA | Workbox (service worker) |
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm test           # vitest unit + integration tests
+npm run test:watch # watch mode
+npx playwright test # E2E tests (requires running dev server)
+npm run build      # production build
+npm run lint       # ESLint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project structure
 
-## Learn More
+```
+src/
+  app/              # Next.js App Router (layout, page, offline)
+  components/       # UI components
+    ui/             # Primitives (BottomSheet, FlagAvatar, Glass, Segmented)
+  hooks/            # useReorder, useSwipeToDelete, useRates
+  lib/              # rates, currencies, types, cookie-storage, local-storage
+  store/            # Zustand converter store
+  __tests__/        # Vitest test suites
+e2e/                # Playwright E2E specs
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Versioning
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **MAJOR** — breaking changes or full redesign
+- **MINOR** — new features (backward-compatible)
+- **PATCH** — bug fixes and small improvements
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [CHANGELOG.md](./CHANGELOG.md) for release history.
