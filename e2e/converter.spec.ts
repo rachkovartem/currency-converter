@@ -73,12 +73,6 @@ test.describe('Converter — Main Features', () => {
     expect(body).toContain('🇺🇸')
   })
 
-  test('AC-4: sparklines rendered by default', async ({ page }) => {
-    // Sparklines are SVG elements inside the list rows
-    const sparklineSvg = page.locator('svg').first()
-    await expect(sparklineSvg).toBeVisible()
-  })
-
   test('AC-8: typing in one field updates all other fields', async ({ page }) => {
     const usdInput = page.getByTestId('currency-input-USD')
     await usdInput.click()

@@ -27,27 +27,27 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
 
 interface ConverterAppProps {
   initialRates: Record<string, number>
-  ratesDate: string
+  ratesUpdatedAt: number
   initialState?: Partial<PersistedConverterState> | null
 }
 
 interface ConverterAppInnerProps {
   initialRates: Record<string, number>
-  ratesDate: string
+  ratesUpdatedAt: number
   store: ConverterStore
 }
 
 // Inner component: all hooks run inside the Provider, so useConverterStore
 // correctly reads from the per-request store via ConverterStoreContext.
-function ConverterAppInner({ initialRates, ratesDate, store }: ConverterAppInnerProps) {
+function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterAppInnerProps) {
   // Capture initial SSR rates in a ref so we can use it in the effect
   // without triggering re-runs on re-renders (rates are daily, SSR-only)
   const initialRatesRef = useRef(initialRates)
 
-  // Initialize store with SSR rates on first mount
+  // Initialize store with SSR rates on first mount, using the real API timestamp
   useEffect(() => {
-    store.setState({ rates: initialRatesRef.current, updatedAt: Date.now() })
-  }, [store])
+    store.setState({ rates: initialRatesRef.current, updatedAt: ratesUpdatedAt })
+  }, [store, ratesUpdatedAt])
 
   const rows = useConverterStore(s => s.rows)
   const activeCode = useConverterStore(s => s.activeCode)
@@ -56,7 +56,6 @@ function ConverterAppInner({ initialRates, ratesDate, store }: ConverterAppInner
   const layout = useConverterStore(s => s.layout)
   const density = useConverterStore(s => s.density)
   const showFlags = useConverterStore(s => s.showFlags)
-  const sparklines = useConverterStore(s => s.sparklines)
   const online = useConverterStore(s => s.online)
   const updatedAt = useConverterStore(s => s.updatedAt)
   const openPicker = useConverterStore(s => s.openPicker)
@@ -64,6 +63,32 @@ function ConverterAppInner({ initialRates, ratesDate, store }: ConverterAppInner
   const setActiveRow = useConverterStore(s => s.setActiveRow)
   const setActiveValue = useConverterStore(s => s.setActiveValue)
   const reorderRows = useConverterStore(s => s.reorderRows)
+  const setOnline = useConverterStore(s => s.setOnline)
+
+  // Sync real network connectivity to the store
+  useEffect(() => {
+    setOnline(navigator.onLine)
+
+    const handleOnline  = () => setOnline(true)
+    const handleOffline = () => setOnline(false)
+
+    window.addEventListener('online',  handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online',  handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [setOnline])
+
+  // Register service worker for PWA / offline support
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // SW registration is best-effort — silently ignore failures
+      })
+    }
+  }, [])
 
   const reorder = useReorder(rows, reorderRows)
 
@@ -111,7 +136,7 @@ function ConverterAppInner({ initialRates, ratesDate, store }: ConverterAppInner
         width: '100%',
       }}
     >
-      <Header ratesDate={ratesDate} />
+      <Header />
 
       {isEmpty ? (
         <EmptyState onAdd={openPicker} />
@@ -142,7 +167,6 @@ function ConverterAppInner({ initialRates, ratesDate, store }: ConverterAppInner
                     }}
                     onSwap={() => handleSwap(code)}
                     showFlag={showFlags}
-                    sparklines={sparklines}
                     decimals={decimals(code)}
                     dragHandlers={reorder.makeHandlers(idx)}
                   />
@@ -178,7 +202,6 @@ function ConverterAppInner({ initialRates, ratesDate, store }: ConverterAppInner
                       onSwap={() => handleSwap(code)}
                       onDelete={() => removeCurrency(code)}
                       showFlag={showFlags}
-                      sparkline={sparklines}
                       decimals={decimals(code)}
                       density={density}
                       dragHandlers={reorder.makeHandlers(idx)}
@@ -229,7 +252,7 @@ function ConverterAppInner({ initialRates, ratesDate, store }: ConverterAppInner
 // Outer component: creates the per-request store and provides it via context.
 // ConverterAppInner renders inside the Provider so its useConverterStore hooks
 // correctly read from the per-request store rather than the module-level default.
-export function ConverterApp({ initialRates, ratesDate, initialState }: ConverterAppProps) {
+export function ConverterApp({ initialRates, ratesUpdatedAt, initialState }: ConverterAppProps) {
   // Create a per-request store seeded with the server-provided cookie state.
   // useState lazy initialiser runs once and is safe to read during render.
   const [store] = useState<ConverterStore>(() => createConverterStore(initialState ?? undefined))
@@ -238,7 +261,7 @@ export function ConverterApp({ initialRates, ratesDate, initialState }: Converte
     <ConverterStoreContext.Provider value={store}>
       <ConverterAppInner
         initialRates={initialRates}
-        ratesDate={ratesDate}
+        ratesUpdatedAt={ratesUpdatedAt}
         store={store}
       />
     </ConverterStoreContext.Provider>

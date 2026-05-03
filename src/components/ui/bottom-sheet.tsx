@@ -22,7 +22,7 @@ export function BottomSheet({ open, onClose, children, height = '78%' }: BottomS
             transition={{ duration: 0.24 }}
             onClick={onClose}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               inset: 0,
               zIndex: 75,
               background: 'rgba(0,0,0,0.35)',
@@ -35,7 +35,7 @@ export function BottomSheet({ open, onClose, children, height = '78%' }: BottomS
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             style={{
-              position: 'absolute',
+              position: 'fixed',
               left: 0,
               right: 0,
               bottom: 0,

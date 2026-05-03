@@ -46,9 +46,10 @@ describe('fetchRates', () => {
     )
   })
 
-  it('parses the date from time_last_update_utc', async () => {
+  it('parses the timestamp from time_last_update_utc', async () => {
     const result = await fetchRates()
-    expect(result.date).toBe('2026-05-03')
+    expect(typeof result.updatedAt).toBe('number')
+    expect(result.updatedAt).toBe(new Date('Sat, 03 May 2026 00:02:31 +0000').getTime())
   })
 
   it('returns MOCK_RATES as fallback when API key is not set', async () => {

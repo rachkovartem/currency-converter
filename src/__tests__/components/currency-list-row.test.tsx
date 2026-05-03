@@ -33,14 +33,13 @@ const defaultProps = {
   onSwap: vi.fn(),
   onDelete: vi.fn(),
   showFlag: true,
-  sparkline: false,
   decimals: 2,
   density: 'compact' as const,
 }
 
 /** Helper to render with a specific container offsetWidth */
 function renderWithWidth(
-  props: typeof defaultProps & { sparkline?: boolean; isActive?: boolean; value?: string },
+  props: typeof defaultProps & { isActive?: boolean; value?: string },
   offsetWidth: number
 ) {
   _defaultOffsetWidth = offsetWidth
@@ -49,25 +48,25 @@ function renderWithWidth(
   return result
 }
 
-// DOM-based collapse logic thresholds (jsdom environment):
+// DOM-based collapse logic thresholds (jsdom environment, no sparkline):
 //
 // In jsdom, child element offsetWidths are all 0 unless explicitly set.
-// natW defaults: { flag: 36, name: 80, sparkline: 52 }
+// natW defaults: { flag: 36, name: 80 }
 // dragW = 0 (jsdom; ?? 30 only catches null/undefined, not 0)
 // gap = 8 (getComputedStyle().gap → NaN → fallback 8)
 // valueSizerRef.offsetWidth = 0 → valueNeedsW = 6 (trivially satisfied)
 //
-// freeWithSparkline    = rowW - 0 - 52 - 24 - 8 = rowW - 84
-// freeWithoutSparkline = rowW - 0 -  0 - 16 - 8 = rowW - 24
-// btn0 = (rowW - 84) / 2,  btn1 = (rowW - 24) / 2
+// free = rowW - 0 - 8*2 - 8 = rowW - 24
+// val1 = free/2 - 8 = rowW/2 - 20
+// btn1 = free/2   = rowW/2 - 12
+//
 // MIN_NAME_PX = 20
 // btnNeedsAll    = 36 + 45 + 20 + 8 = 109
 // btnNeedsNoName = 36 + 45 + 8      =  89
 //
-// Level 0:  btn0 >= 109  →  rowW >= 302
-// Level 1:  btn1 >= 109  →  242 <= rowW < 302
-// Level 2:  btn1 >= 89   →  202 <= rowW < 242
-// Level 3:  btn1 <  89   →  rowW < 202
+// Level 0 (all visible):  btn1 >= 109  →  rowW >= 242
+// Level 1 (name hidden):  btn1 >= 89   →  202 <= rowW < 242
+// Level 2 (all collapsed): rowW < 202
 
 describe('CurrencyListRow', () => {
   beforeEach(() => {
@@ -90,12 +89,14 @@ describe('CurrencyListRow', () => {
     expect(input.style.width).toBe('100%')
   })
 
-  it('sparkline container renders when sparkline is true', () => {
-    const { container } = render(<CurrencyListRow {...defaultProps} sparkline={true} />)
-    // The sparkline wrapper div is now wrapped in a collapsing div with maxWidth transition
-    // It should have overflow: hidden and display: flex on the inner div
-    const sparklineWrappers = container.querySelectorAll('[style*="overflow: hidden"]')
-    expect(sparklineWrappers.length).toBeGreaterThan(0)
+  it('source does not import sparkline component', () => {
+    const src = readFileSync(
+      resolve(__dirname, '../../components/currency-list-row.tsx'),
+      'utf-8'
+    )
+    expect(src).not.toContain('sparkline')
+    expect(src).not.toContain('Sparkline')
+    expect(src).not.toContain('SERIES')
   })
 
   it('value input container uses flex: 1 to fill remaining space', () => {
@@ -150,16 +151,15 @@ describe('CurrencyListRow', () => {
   //
   // See threshold derivation at the top of this file.
   //
-  // Level 0 (all visible):    rowW >= 302  → use 320
-  // Level 1 (sparkline only): 242 <= rowW < 302  → use 270
-  // Level 2 (sparkline+name): 202 <= rowW < 242  → use 220
-  // Level 3 (all collapsed):  rowW < 202   → use 150
+  // Level 0 (all visible):   rowW >= 242  → use 260
+  // Level 1 (name hidden):   202 <= rowW < 242  → use 220
+  // Level 2 (all collapsed): rowW < 202   → use 150
 
-  // collapseLevel = 0: all elements visible when container >= 302
-  it('level 0: all elements visible at 320px container width', () => {
+  // collapseLevel = 0: all elements visible when container >= 242
+  it('level 0: all elements visible at 260px container width', () => {
     const { container } = renderWithWidth(
-      { ...defaultProps, value: '100', isActive: true, sparkline: true },
-      320
+      { ...defaultProps, value: '100', isActive: true },
+      260
     )
     const collapsed = Array.from(
       container.querySelectorAll<HTMLElement>('[style*="max-width"]')
@@ -167,49 +167,36 @@ describe('CurrencyListRow', () => {
     expect(collapsed.length).toBe(0)
   })
 
-  // collapseLevel = 1: sparkline collapses at 270px (242 <= 270 < 302)
-  it('level 1: sparkline collapses when container is 270px', () => {
+  // collapseLevel = 1: name collapses at 220px (202 <= 220 < 242)
+  it('level 1: currency name collapses when container is 220px', () => {
     const { container } = renderWithWidth(
-      { ...defaultProps, value: '100', isActive: true, sparkline: true },
-      270
+      { ...defaultProps, value: '100', isActive: true },
+      220
     )
     const allMaxWidth = Array.from(
       container.querySelectorAll<HTMLElement>('[style*="max-width"]')
     )
-    // Sparkline wrapper should be collapsed (maxWidth: 0)
+    // Name div should be collapsed (maxWidth: 0)
     const collapsed = allMaxWidth.filter(el => el.style.maxWidth === '0px')
     expect(collapsed.length).toBe(1)
-    // Name div should still be visible (maxWidth != 0)
-    const nameDiv = allMaxWidth.find(
-      el => el.style.maxWidth !== '0px' && el.textContent === 'US Dollar'
+    // Flag div should still be visible (maxWidth != 0)
+    const flagDiv = allMaxWidth.find(
+      el => el.style.maxWidth !== '0px'
     )
-    expect(nameDiv).toBeDefined()
+    expect(flagDiv).toBeDefined()
   })
 
-  // collapseLevel = 2: sparkline + name collapse at 220px (202 <= 220 < 242)
-  it('level 2: sparkline and currency name collapse at 220px container width', () => {
+  // collapseLevel = 2: name + flag collapse at 150px (< 202)
+  it('level 2: flag and currency name both collapse at 150px container width', () => {
     const { container } = renderWithWidth(
-      { ...defaultProps, value: '100', isActive: true, sparkline: true },
-      220
-    )
-    const collapsed = Array.from(
-      container.querySelectorAll<HTMLElement>('[style*="max-width"]')
-    ).filter(el => el.style.maxWidth === '0px')
-    // Sparkline + name should both be collapsed
-    expect(collapsed.length).toBe(2)
-  })
-
-  // collapseLevel = 3: sparkline + name + flag collapse at 150px (< 202)
-  it('level 3: flag, name, and sparkline all collapse at 150px container width', () => {
-    const { container } = renderWithWidth(
-      { ...defaultProps, value: '100', isActive: true, sparkline: true },
+      { ...defaultProps, value: '100', isActive: true },
       150
     )
     const collapsed = Array.from(
       container.querySelectorAll<HTMLElement>('[style*="max-width"]')
     ).filter(el => el.style.maxWidth === '0px')
-    // Flag + name + sparkline all collapsed → 3 elements
-    expect(collapsed.length).toBe(3)
+    // Flag + name should both be collapsed
+    expect(collapsed.length).toBe(2)
   })
 
   it('currency code is always rendered regardless of value length', () => {
@@ -227,22 +214,20 @@ describe('CurrencyListRow', () => {
     expect(input.style.width).toBe('100%')
   })
 
-  // At rowW=220: level 2 (sparkline+name collapsed, flag visible)
-  // This applies to both short and long value strings since valueNeedsW=6 in jsdom
-  it('non-active row: name and sparkline collapse when container is 220px', () => {
+  // At rowW=150: level 2 (name + flag collapsed)
+  it('non-active row: name and flag collapse when container is 150px', () => {
     const { container } = renderWithWidth(
       {
         ...defaultProps,
         value: '1234567890',
         isActive: false,
-        sparkline: true,
       },
-      220
+      150
     )
     const collapsed = Array.from(
       container.querySelectorAll<HTMLElement>('[style*="max-width"]')
     ).filter(el => el.style.maxWidth === '0px')
-    // At collapseLevel=2: name + sparkline collapsed
+    // At collapseLevel=2: name + flag collapsed
     expect(collapsed.length).toBeGreaterThanOrEqual(2)
   })
 })

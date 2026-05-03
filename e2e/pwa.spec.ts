@@ -41,6 +41,15 @@ test.describe('PWA & SEO', () => {
     expect(manifest.display).toBe('standalone')
     expect(manifest.name).toContain('Convert')
     expect(Array.isArray(manifest.icons)).toBe(true)
+
+    // Additional manifest field checks
+    expect(manifest.scope).toBeDefined()
+    expect(manifest.lang).toBe('en')
+
+    const icons = manifest.icons as Array<Record<string, unknown>>
+    expect(icons.some(icon => 'purpose' in icon)).toBe(true)
+
+    expect(manifest.prefer_related_applications).toBe(false)
   })
 
   test('AC-13: page has JSON-LD script with @type: WebApplication', async ({ page }) => {
@@ -60,5 +69,12 @@ test.describe('PWA & SEO', () => {
     await page.goto('/')
     const title = await page.title()
     expect(title).toContain('Convert')
+  })
+
+  test('offline page is accessible', async ({ page }) => {
+    await page.goto('/offline')
+    await page.waitForLoadState('networkidle')
+    // Should render without crashing
+    expect(await page.title()).toBeTruthy()
   })
 })

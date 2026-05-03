@@ -7,11 +7,11 @@ export const dynamic = 'force-dynamic'
 export const metadata = {
   title: 'Convert — Currency Converter | Live Exchange Rates',
   description:
-    'Free real-time currency converter. Convert USD to EUR, GBP, JPY and 20+ currencies. ECB rates, sparkline charts, and conversion history.',
+    'Free real-time currency converter. Convert USD to EUR, GBP, JPY and 20+ currencies. ECB rates and conversion history.',
 }
 
 export default async function Page() {
-  const { rates: initialRates, date: ratesDate } = await fetchRates()
+  const { rates: initialRates, updatedAt: ratesUpdatedAt } = await fetchRates()
   const cookieState = await getServerConverterCookieState()
 
   const jsonLd = {
@@ -37,7 +37,7 @@ export default async function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ConverterApp initialRates={initialRates} ratesDate={ratesDate} initialState={cookieState} />
+      <ConverterApp initialRates={initialRates} ratesUpdatedAt={ratesUpdatedAt} initialState={cookieState} />
     </main>
   )
 }

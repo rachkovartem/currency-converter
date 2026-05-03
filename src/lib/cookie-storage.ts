@@ -48,7 +48,6 @@ export type PersistedConverterState = {
   layout: 'list' | 'grid'
   density: 'compact' | 'comfortable'
   showFlags: boolean
-  sparklines: boolean
 }
 
 /**

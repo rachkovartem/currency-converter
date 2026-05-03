@@ -51,7 +51,6 @@ const defaultState = {
   layout: 'list' as const,
   density: 'compact' as const,
   showFlags: true,
-  sparklines: true,
   pickerOpen: false,
   historyPair: null,
   showRecents: false,
@@ -64,7 +63,7 @@ beforeEach(() => {
 
 const defaultProps = {
   initialRates: defaultState.rates,
-  ratesDate: '2026-05-02',
+  ratesUpdatedAt: Date.now(),
 }
 
 describe('ConverterApp', () => {
@@ -77,7 +76,7 @@ describe('ConverterApp', () => {
     render(
       <ConverterApp
         initialRates={defaultState.rates}
-        ratesDate="2026-05-02"
+        ratesUpdatedAt={Date.now()}
         initialState={{ rows: ['CHF', 'NOK', 'AUD'], activeCode: 'CHF' }}
       />
     )
@@ -92,7 +91,7 @@ describe('ConverterApp', () => {
     render(
       <ConverterApp
         initialRates={defaultState.rates}
-        ratesDate="2026-05-02"
+        ratesUpdatedAt={Date.now()}
         initialState={null}
       />
     )
@@ -157,7 +156,7 @@ describe('ConverterApp', () => {
     // We verify rate initialization by checking the rendered conversion value for EUR.
     // With EUR rate = 0.9999 and active USD = 100, EUR displays ~99.99
     const customRates = { ...defaultState.rates, EUR: 0.9999 }
-    render(<ConverterApp initialRates={customRates} ratesDate="2026-05-02" />)
+    render(<ConverterApp initialRates={customRates} ratesUpdatedAt={Date.now()} />)
     await waitFor(() => {
       const eurInput = screen.getByTestId('currency-input-EUR') as HTMLInputElement
       // 100 USD * 0.9999 = 99.99 EUR — the value must be close to 99.99 not 92

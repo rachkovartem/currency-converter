@@ -12,7 +12,6 @@ beforeEach(() => {
     layout: 'list',
     density: 'compact',
     showFlags: true,
-    sparklines: true,
     pickerOpen: false,
     historyPair: null,
     showRecents: false,
@@ -127,13 +126,6 @@ describe('setShowFlags()', () => {
   })
 })
 
-describe('setSparklines()', () => {
-  it('setSparklines(false) changes sparklines to false', () => {
-    useConverterStore.getState().setSparklines(false)
-    expect(useConverterStore.getState().sparklines).toBe(false)
-  })
-})
-
 describe('openSettings() / closeSettings()', () => {
   it('openSettings sets settingsOpen to true', () => {
     useConverterStore.getState().openSettings()
@@ -196,6 +188,16 @@ describe('useConverterStore static methods (backward-compat)', () => {
 
   it('has subscribe', () => {
     expect(typeof useConverterStore.subscribe).toBe('function')
+  })
+})
+
+describe('setOnline()', () => {
+  it('setOnline() updates online state', () => {
+    const store = createConverterStore()
+    store.getState().setOnline(false)
+    expect(store.getState().online).toBe(false)
+    store.getState().setOnline(true)
+    expect(store.getState().online).toBe(true)
   })
 })
 

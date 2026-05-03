@@ -3,8 +3,7 @@
 import { GripVertical } from 'lucide-react'
 import { Currency } from '@/lib/types'
 import { FlagAvatar } from '@/components/ui/flag-avatar'
-import { Sparkline } from '@/components/ui/sparkline'
-import { SERIES, formatNumber } from '@/lib/rates'
+import { formatNumber } from '@/lib/rates'
 
 interface CurrencyGridTileProps {
   currency: Currency
@@ -14,7 +13,6 @@ interface CurrencyGridTileProps {
   onChange: (value: string) => void
   onSwap: () => void
   showFlag: boolean
-  sparklines?: boolean
   decimals: number
   dragHandlers?: {
     onPointerDown: (e: React.PointerEvent) => void
@@ -31,7 +29,6 @@ export function CurrencyGridTile({
   onChange,
   onSwap,
   showFlag,
-  sparklines = true,
   decimals,
   dragHandlers,
 }: CurrencyGridTileProps) {
@@ -119,14 +116,6 @@ export function CurrencyGridTile({
         <div style={{ fontSize: 11, color: 'var(--cc-text-muted)', fontWeight: 500 }}>
           {currency.symbol} · {currency.name}
         </div>
-        {sparklines && (
-          <Sparkline
-            data={SERIES[currency.code] ?? []}
-            width={42}
-            height={16}
-            color="var(--cc-accent)"
-          />
-        )}
       </div>
     </div>
   )

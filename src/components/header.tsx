@@ -2,25 +2,16 @@
 
 import { History, Settings } from 'lucide-react'
 import { useConverterStore } from '@/store/converter-store'
-import { timeAgo } from '@/lib/time'
 
-interface HeaderProps {
-  ratesDate?: string
-}
-
-export function Header({ ratesDate }: HeaderProps) {
+export function Header() {
   const rows = useConverterStore(s => s.rows)
   const online = useConverterStore(s => s.online)
   const updatedAt = useConverterStore(s => s.updatedAt)
   const openRecents = useConverterStore(s => s.openRecents)
   const openSettings = useConverterStore(s => s.openSettings)
 
-  const formattedRatesDate = ratesDate
-    ? new Date(ratesDate + 'T00:00:00').toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
+  const formattedDate = updatedAt
+    ? new Date(updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : null
 
   return (
@@ -58,12 +49,14 @@ export function Header({ ratesDate }: HeaderProps) {
             }}
           />
           {online ? 'Live' : 'Offline'}
-          <span
-            data-testid="last-updated"
-            style={{ color: 'var(--cc-text-muted)', fontWeight: 500, marginLeft: 2 }}
-          >
-            {formattedRatesDate ? `ECB · ${formattedRatesDate}` : `· ${timeAgo(updatedAt)}`}
-          </span>
+          {formattedDate && (
+            <span
+              data-testid="last-updated"
+              style={{ color: 'var(--cc-text-muted)', fontWeight: 500, marginLeft: 2 }}
+            >
+              ECB · {formattedDate}
+            </span>
+          )}
         </div>
 
         {/* Header action buttons */}

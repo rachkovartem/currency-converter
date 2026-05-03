@@ -1,6 +1,6 @@
 'use client'
 
-import { LayoutList, LayoutGrid, Flag, TrendingUp } from 'lucide-react'
+import { LayoutList, LayoutGrid, Flag } from 'lucide-react'
 import { useConverterStore } from '@/store/converter-store'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 
@@ -10,11 +10,9 @@ export function SettingsSheet() {
   const layout = useConverterStore(s => s.layout)
   const density = useConverterStore(s => s.density)
   const showFlags = useConverterStore(s => s.showFlags)
-  const sparklines = useConverterStore(s => s.sparklines)
   const setLayout = useConverterStore(s => s.setLayout)
   const setDensity = useConverterStore(s => s.setDensity)
   const setShowFlags = useConverterStore(s => s.setShowFlags)
-  const setSparklines = useConverterStore(s => s.setSparklines)
 
   return (
     <BottomSheet open={settingsOpen} onClose={closeSettings} height="auto">
@@ -193,7 +191,6 @@ export function SettingsSheet() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '14px 0',
-              borderBottom: '0.5px solid var(--cc-sep)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -224,54 +221,6 @@ export function SettingsSheet() {
                   position: 'absolute',
                   top: 2,
                   left: showFlags ? 22 : 2,
-                  width: 27,
-                  height: 27,
-                  borderRadius: 13.5,
-                  background: '#fff',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
-                  transition: 'left 200ms ease',
-                }}
-              />
-            </button>
-          </div>
-
-          {/* Sparklines toggle row */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '14px 0',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <TrendingUp size={18} color="var(--cc-text-muted)" />
-              <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--cc-text)' }}>
-                Sparklines
-              </span>
-            </div>
-            <button
-              data-testid="toggle-sparklines"
-              onClick={() => setSparklines(!sparklines)}
-              aria-pressed={sparklines}
-              aria-label="Toggle sparklines"
-              style={{
-                position: 'relative',
-                width: 51,
-                height: 31,
-                borderRadius: 15.5,
-                border: 'none',
-                background: sparklines ? 'var(--cc-accent)' : 'oklch(0.4 0 0)',
-                cursor: 'pointer',
-                transition: 'background 200ms ease',
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 2,
-                  left: sparklines ? 22 : 2,
                   width: 27,
                   height: 27,
                   borderRadius: 13.5,

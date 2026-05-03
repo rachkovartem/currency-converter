@@ -3,10 +3,9 @@
 import { Star } from 'lucide-react'
 import { useConverterStore } from '@/store/converter-store'
 import { CURRENCY_BY_CODE } from '@/lib/currencies'
-import { SERIES, convert, formatNumber } from '@/lib/rates'
+import { convert, formatNumber } from '@/lib/rates'
 import { Glass } from '@/components/ui/glass'
 import { FlagAvatar } from '@/components/ui/flag-avatar'
-import { Sparkline } from '@/components/ui/sparkline'
 
 export function FavoritesSection() {
   const favorites = useConverterStore(s => s.favorites)
@@ -74,7 +73,6 @@ export function FavoritesSection() {
                   1 {activeCode} = {formatNumber(convert(1, activeCode, code, rates), 4)} {code}
                 </div>
               </div>
-              <Sparkline data={SERIES[code] ?? []} width={40} height={18} color="var(--cc-accent)" />
               <span
                 onClick={(e) => {
                   e.stopPropagation()

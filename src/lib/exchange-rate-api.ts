@@ -11,20 +11,20 @@ interface ExchangeRateApiResponse {
 
 export interface RatesResult {
   rates: Record<string, number>
-  date: string // ISO date string "YYYY-MM-DD"
+  updatedAt: number // unix ms timestamp
 }
 
 export async function fetchRates(): Promise<RatesResult> {
   // Never hit the real API in development — preserve free-tier limits
   if (process.env.NODE_ENV === 'development') {
-    return { rates: MOCK_RATES, date: new Date().toISOString().split('T')[0] }
+    return { rates: MOCK_RATES, updatedAt: Date.now() }
   }
 
   const apiKey = process.env.EXCHANGE_RATE_API_KEY
 
   if (!apiKey) {
     console.warn('EXCHANGE_RATE_API_KEY not set, using mock rates')
-    return { rates: MOCK_RATES, date: new Date().toISOString().split('T')[0] }
+    return { rates: MOCK_RATES, updatedAt: Date.now() }
   }
 
   try {
@@ -45,15 +45,14 @@ export async function fetchRates(): Promise<RatesResult> {
       throw new Error(`ExchangeRate-API returned error result`)
     }
 
-    // date from "Sat, 03 May 2026 00:02:31 +0000" → "2026-05-03"
-    const date = new Date(data.time_last_update_utc).toISOString().split('T')[0]
+    const updatedAt = new Date(data.time_last_update_utc).getTime()
 
     return {
       rates: data.conversion_rates,
-      date,
+      updatedAt,
     }
   } catch (error) {
     console.error('Failed to fetch rates from ExchangeRate-API:', error)
-    return { rates: MOCK_RATES, date: new Date().toISOString().split('T')[0] }
+    return { rates: MOCK_RATES, updatedAt: Date.now() }
   }
 }

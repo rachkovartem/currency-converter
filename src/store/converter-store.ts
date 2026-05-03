@@ -20,7 +20,6 @@ interface ConverterState {
   layout: 'list' | 'grid'
   density: 'compact' | 'comfortable'
   showFlags: boolean
-  sparklines: boolean
   // Overlay state (not persisted)
   pickerOpen: boolean
   historyPair: { from: CurrencyCode; to: CurrencyCode } | null
@@ -37,7 +36,6 @@ interface ConverterState {
   setLayout: (layout: 'list' | 'grid') => void
   setDensity: (density: 'compact' | 'comfortable') => void
   setShowFlags: (show: boolean) => void
-  setSparklines: (show: boolean) => void
   openPicker: () => void
   closePicker: () => void
   openHistory: (pair: { from: CurrencyCode; to: CurrencyCode }) => void
@@ -47,6 +45,7 @@ interface ConverterState {
   pickRecent: (recent: RecentConversion) => void
   openSettings: () => void
   closeSettings: () => void
+  setOnline: (online: boolean) => void
 }
 
 export function createConverterStore(initialState?: Partial<PersistedConverterState>) {
@@ -68,7 +67,6 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         layout: 'list',
         density: 'compact',
         showFlags: true,
-        sparklines: true,
         pickerOpen: false,
         historyPair: null,
         showRecents: false,
@@ -99,7 +97,6 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         setLayout: (layout) => set({ layout }),
         setDensity: (density) => set({ density }),
         setShowFlags: (showFlags) => set({ showFlags }),
-        setSparklines: (sparklines) => set({ sparklines }),
         openPicker: () => set({ pickerOpen: true }),
         closePicker: () => set({ pickerOpen: false }),
         openHistory: (pair) => set({ historyPair: pair }),
@@ -108,6 +105,7 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         closeRecents: () => set({ showRecents: false }),
         openSettings: () => set({ settingsOpen: true }),
         closeSettings: () => set({ settingsOpen: false }),
+        setOnline: (online) => set({ online }),
         pickRecent: (recent) => set((state) => {
           const rows = [...state.rows]
           if (!rows.includes(recent.from)) rows.push(recent.from)
@@ -127,7 +125,7 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         partialize: (state) => {
           const persistedKeys: (keyof ConverterState)[] = [
             'rows', 'activeCode', 'activeValue', 'favorites', 'recents',
-            'layout', 'density', 'showFlags', 'sparklines',
+            'layout', 'density', 'showFlags',
             // settingsOpen, pickerOpen, historyPair, showRecents are NOT persisted
           ]
           return Object.fromEntries(
