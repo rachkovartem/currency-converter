@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { GripVertical } from 'lucide-react'
 import { Currency } from '@/lib/types'
 import { FlagAvatar } from '@/components/ui/flag-avatar'
@@ -36,9 +36,6 @@ export function CurrencyGridTile({
   dragHandlers,
 }: CurrencyGridTileProps) {
   const [isTyping, setIsTyping] = useState(false)
-  useEffect(() => {
-    if (!isActive) setIsTyping(false)
-  }, [isActive])
 
   const isCompact = density === 'compact'
   return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useLayoutEffect, useEffect } from 'react'
+import { useRef, useState, useLayoutEffect } from 'react'
 import { GripVertical, Trash2 } from 'lucide-react'
 import { Currency } from '@/lib/types'
 import { FlagAvatar } from '@/components/ui/flag-avatar'
@@ -40,9 +40,6 @@ export function CurrencyListRow({
   dragHandlers,
 }: CurrencyListRowProps) {
   const [isTyping, setIsTyping] = useState(false)
-  useEffect(() => {
-    if (!isActive) setIsTyping(false)
-  }, [isActive])
 
   const { dx, setDx, handlers } = useSwipeToDelete(onDelete)
   const padY = density === 'compact' ? 5 : 10
