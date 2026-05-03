@@ -5,6 +5,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) · Versioning: 
 
 ---
 
+## [1.2.3] — 2026-05-03
+
+### Fixed
+- **iOS safe area** — `env(safe-area-inset-top)` moved from header to root container so the notch offset applies in all modes, including Focus Mode where the header is hidden
+
+---
+
 ## [1.2.2] — 2026-05-03
 
 ### Fixed
