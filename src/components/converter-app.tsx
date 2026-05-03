@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useEffect, useRef } from 'react'
+import { useMemo, useEffect, useLayoutEffect, useRef } from 'react'
 import { Wifi, WifiOff } from 'lucide-react'
 import { useConverterStore, useHasHydrated } from '@/store/converter-store'
 import { convert, formatNumber } from '@/lib/rates'
@@ -68,6 +68,18 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
   const reorderRows = useConverterStore(s => s.reorderRows)
 
   const reorder = useReorder(rows, reorderRows)
+
+  // Local DOM refs for the list container and each row wrapper.
+  // Using standard useRef avoids the react-hooks/refs lint rule that fires
+  // when a ref-writing callback function is used directly as a JSX ref prop.
+  const listContainerRef = useRef<HTMLDivElement | null>(null)
+  const rowDivRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  // Sync local refs to the reorder hook after every render (post-layout).
+  useLayoutEffect(() => {
+    reorder.setContainerRef(listContainerRef.current)
+    rows.forEach((_, i) => reorder.setItemRef(i)(rowDivRefs.current[i] ?? null))
+  })
 
   // Memoized value calculator
   const valueFor = useMemo(() => {
@@ -145,6 +157,7 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
             </div>
           ) : (
             <div
+              ref={listContainerRef}
               data-testid="currency-rows-container"
               style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
             >
@@ -152,23 +165,12 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
                 const c = CURRENCY_BY_CODE[code]
                 if (!c) return null
                 const v = valueFor(code)
-                const isDragging = reorder.draggingIdx === idx
 
                 return (
                   <div
+                    ref={(el) => { rowDivRefs.current[idx] = el }}
                     key={code}
-                    style={{
-                      transform: isDragging
-                        ? `translateY(${reorder.offsetY}px) scale(1.02)`
-                        : 'none',
-                      opacity:
-                        reorder.draggingIdx != null && !isDragging ? 0.7 : 1,
-                      zIndex: isDragging ? 10 : 1,
-                      position: 'relative',
-                      transition: isDragging
-                        ? 'none'
-                        : 'transform 200ms ease, opacity 200ms ease',
-                    }}
+                    style={{ position: 'relative' }}
                   >
                     <CurrencyListRow
                       currency={c}

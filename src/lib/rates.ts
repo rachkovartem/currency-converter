@@ -10,8 +10,11 @@ export const MOCK_RATES: Record<string, number> = {
   PEN: 3.77, EGP: 30.9, NGN: 1310.0, KWD: 0.307, SAR: 3.75,
   QAR: 3.64, UAH: 37.2, VND: 24500, TWD: 31.9, PKR: 278.0,
   BDT: 110.0, BGN: 1.80, HRK: 7.12, RSD: 107.0, GEL: 2.68,
-  AMD: 388.0, KZT: 446.0, UZS: 12600, AZN: 1.70, BYN: 3.27,
+  RUB: 91.5, AMD: 388.0, KZT: 446.0, UZS: 12600, AZN: 1.70, BYN: 3.27,
   MDL: 17.8, MAD: 10.1, TND: 3.12,
+  ANG: 1.79, BIF: 2860, BWP: 13.4, FKP: 0.79, FOK: 6.9,
+  GGP: 0.79, GIP: 0.79, JEP: 0.79, KID: 1.51, KMF: 452,
+  SHP: 0.79, SLE: 22.5, SSP: 1305, TVD: 1.51, ZWL: 361,
 }
 
 // Generate a deterministic 30-point sparkline series for each pair (vs USD)
