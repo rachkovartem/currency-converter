@@ -159,14 +159,18 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
       {focusMode && (
         <div
           style={{
-            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-            zIndex: 10, display: 'flex', gap: 8,
+            position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 31, maxWidth: 500, width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '0 clamp(6px, 3vw, 12px)',
+            pointerEvents: 'none',
           }}
         >
           <button
             onClick={openRecents}
             aria-label="Recent conversions"
             style={{
+              pointerEvents: 'auto',
               border: 'none', background: 'var(--cc-chip)',
               cursor: 'pointer', width: 36, height: 36, borderRadius: 18,
               color: 'var(--cc-text)', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -178,6 +182,7 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
             onClick={openSettings}
             aria-label="Display settings"
             style={{
+              pointerEvents: 'auto',
               border: 'none', background: 'var(--cc-chip)',
               cursor: 'pointer', width: 36, height: 36, borderRadius: 18,
               color: 'var(--cc-text)', display: 'flex', alignItems: 'center', justifyContent: 'center',
