@@ -223,6 +223,7 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
                     onSwap={() => handleSwap(code)}
                     showFlag={showFlags}
                     decimals={decimals(code)}
+                    density={density}
                     dragHandlers={reorder.makeHandlers(idx)}
                   />
                 )

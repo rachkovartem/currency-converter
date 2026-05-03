@@ -14,6 +14,7 @@ interface CurrencyGridTileProps {
   onSwap: () => void
   showFlag: boolean
   decimals: number
+  density?: 'compact' | 'comfortable'
   dragHandlers?: {
     onPointerDown: (e: React.PointerEvent) => void
     onPointerMove: (e: React.PointerEvent) => void
@@ -30,14 +31,16 @@ export function CurrencyGridTile({
   onSwap,
   showFlag,
   decimals,
+  density = 'comfortable',
   dragHandlers,
 }: CurrencyGridTileProps) {
+  const isCompact = density === 'compact'
   return (
     <div
       style={{
         position: 'relative',
         borderRadius: 22,
-        padding: 14,
+        padding: isCompact ? 8 : 14,
         background: 'var(--cc-card-solid)',
         border: '0.5px solid var(--cc-card-border)',
         boxShadow: isActive
@@ -45,8 +48,8 @@ export function CurrencyGridTile({
           : '0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 10,
-        minHeight: 130,
+        gap: isCompact ? 4 : 10,
+        minHeight: isCompact ? 90 : 130,
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -62,10 +65,10 @@ export function CurrencyGridTile({
             padding: 0,
           }}
         >
-          <FlagAvatar currency={currency} size={28} showFlag={showFlag} />
+          <FlagAvatar currency={currency} size={isCompact ? 22 : 28} showFlag={showFlag} />
           <div
             style={{
-              fontSize: 14,
+              fontSize: isCompact ? 12 : 14,
               fontWeight: 700,
               color: 'var(--cc-text)',
               letterSpacing: -0.2,
@@ -97,7 +100,7 @@ export function CurrencyGridTile({
           outline: 'none',
           background: 'transparent',
           fontFamily: 'inherit',
-          fontSize: 26,
+          fontSize: isCompact ? 18 : 26,
           fontWeight: 700,
           color: isActive ? 'var(--cc-accent)' : 'var(--cc-text)',
           padding: 0,
@@ -116,7 +119,7 @@ export function CurrencyGridTile({
           marginTop: 'auto',
         }}
       >
-        <div style={{ fontSize: 11, color: 'var(--cc-text-muted)', fontWeight: 500 }}>
+        <div style={{ fontSize: isCompact ? 10 : 11, color: 'var(--cc-text-muted)', fontWeight: 500 }}>
           {currency.symbol} · {currency.name}
         </div>
       </div>
