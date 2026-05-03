@@ -118,8 +118,14 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
 
   const handleSwap = (code: string) => {
     const v = valueFor(code)
+    const num = parseFloat(v) || 0
     setActiveRow(code)
-    setActiveValue(formatNumber(parseFloat(v) || 0, decimals(code)).replace(/,/g, ''))
+    // For zero-decimal currencies (JPY, KRW, etc.) keep as integer.
+    // For others, store up to 8 significant decimal places so that
+    // re-conversions from this row don't introduce rounding drift.
+    // parseFloat strips trailing zeros: "3.06360000" → "3.0636".
+    const dec = decimals(code)
+    setActiveValue(parseFloat(num.toFixed(dec === 0 ? 0 : 8)).toString())
   }
 
   const isEmpty = rows.length === 0

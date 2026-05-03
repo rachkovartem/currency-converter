@@ -85,7 +85,10 @@ export function CurrencyGridTile({
       <input
         data-testid={`currency-input-${currency.code}`}
         value={isActive ? value : formatNumber(parseFloat(value) || 0, decimals)}
-        onFocus={onFocus}
+        onFocus={(e) => {
+          onFocus()
+          setTimeout(() => e.target.select(), 0)
+        }}
         onChange={(e) => onChange(e.target.value.replace(/[^\d.]/g, ''))}
         inputMode="decimal"
         placeholder="0"
