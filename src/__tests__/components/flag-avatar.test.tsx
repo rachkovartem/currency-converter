@@ -11,8 +11,8 @@ describe('FlagAvatar', () => {
     expect(getByText(usd.flag)).toBeTruthy()
   })
 
-  it('shows code when showFlag=false', () => {
-    const { getByText } = render(<FlagAvatar currency={usd} showFlag={false} size={36} />)
-    expect(getByText('USD')).toBeTruthy()
+  it('renders nothing when showFlag=false', () => {
+    const { container } = render(<FlagAvatar currency={usd} showFlag={false} size={36} />)
+    expect(container.firstChild).toBeNull()
   })
 })

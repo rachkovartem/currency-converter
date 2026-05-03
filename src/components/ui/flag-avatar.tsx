@@ -9,6 +9,8 @@ interface FlagAvatarProps {
 }
 
 export function FlagAvatar({ currency, size = 36, showFlag = true }: FlagAvatarProps) {
+  if (!showFlag) return null
+
   return (
     <div
       style={{
@@ -19,20 +21,13 @@ export function FlagAvatar({ currency, size = 36, showFlag = true }: FlagAvatarP
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: showFlag ? size * 0.72 : size * 0.36,
-        fontWeight: 700,
-        letterSpacing: -0.4,
-        color: 'var(--cc-text-muted)',
+        fontSize: size * 0.72,
         flexShrink: 0,
         overflow: 'hidden',
         lineHeight: 1,
       }}
     >
-      {showFlag ? (
-        <span style={{ filter: 'saturate(1.05)' }}>{currency.flag}</span>
-      ) : (
-        currency.code
-      )}
+      <span style={{ filter: 'saturate(1.05)' }}>{currency.flag}</span>
     </div>
   )
 }
