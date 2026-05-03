@@ -198,7 +198,7 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
       ) : (
         <div
           className="no-scrollbar"
-          style={{ flex: 1, overflowY: 'auto', padding: '8px clamp(6px, 3vw, 12px) 100px' }}
+          style={{ flex: 1, overflowY: 'auto', padding: 'clamp(6px, 3vw, 12px) clamp(6px, 3vw, 12px) 100px' }}
         >
           {layout === 'grid' ? (
             <div
