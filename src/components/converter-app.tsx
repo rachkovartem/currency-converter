@@ -90,61 +90,6 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
     }
   }, [])
 
-  const [keyboardOpen, setKeyboardOpen] = useState(false)
-
-  // Detect virtual keyboard — combined approach for iOS + Android reliability.
-  //
-  // 1. focusin/focusout: immediate signal when any <input> gains / loses focus.
-  //    Works on all platforms but fires before the keyboard actually appears.
-  //
-  // 2. visualViewport resize with stored baseline: correct for both platforms.
-  //    – iOS: window.innerHeight stays constant, vv.height shrinks → use baseline.
-  //    – Android: both window.innerHeight and vv.height shrink together,
-  //      so comparing them gives ~0. Comparing against the baseline captured
-  //      at mount (before any keyboard) gives the real keyboard height.
-  useEffect(() => {
-    const vv = window.visualViewport
-
-    // Capture initial viewport height as keyboard-closed baseline
-    let baselineHeight = vv ? vv.height : window.innerHeight
-
-    // visualViewport resize handler — compares against stored baseline
-    const onVvResize = () => {
-      if (!vv) return
-      setKeyboardOpen(baselineHeight - vv.height > 150)
-    }
-
-    // Reset baseline after orientation change (landscape ↔ portrait)
-    const onOrientation = () => {
-      setTimeout(() => {
-        if (vv) baselineHeight = vv.height
-      }, 500)
-    }
-
-    // focusin/focusout — fires immediately, before keyboard animation
-    const onFocusIn = (e: FocusEvent) => {
-      if (e.target instanceof HTMLInputElement) setKeyboardOpen(true)
-    }
-    const onFocusOut = () => {
-      // 150 ms delay so switching between inputs doesn't flicker
-      setTimeout(() => {
-        if (!(document.activeElement instanceof HTMLInputElement)) setKeyboardOpen(false)
-      }, 150)
-    }
-
-    vv?.addEventListener('resize', onVvResize)
-    window.addEventListener('orientationchange', onOrientation)
-    document.addEventListener('focusin', onFocusIn)
-    document.addEventListener('focusout', onFocusOut)
-
-    return () => {
-      vv?.removeEventListener('resize', onVvResize)
-      window.removeEventListener('orientationchange', onOrientation)
-      document.removeEventListener('focusin', onFocusIn)
-      document.removeEventListener('focusout', onFocusOut)
-    }
-  }, [])
-
   const reorder = useReorder(rows, reorderRows)
 
   // Local DOM refs for the list container and each row wrapper.
@@ -191,7 +136,7 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
         width: '100%',
       }}
     >
-      <Header keyboardOpen={keyboardOpen} />
+      <Header />
 
       {isEmpty ? (
         <EmptyState onAdd={openPicker} />
@@ -224,7 +169,6 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
                     showFlag={showFlags}
                     decimals={decimals(code)}
                     dragHandlers={reorder.makeHandlers(idx)}
-                    keyboardOpen={keyboardOpen}
                   />
                 )
               })}
@@ -261,7 +205,6 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
                       decimals={decimals(code)}
                       density={density}
                       dragHandlers={reorder.makeHandlers(idx)}
-                      keyboardOpen={keyboardOpen}
                     />
                   </div>
                 )
