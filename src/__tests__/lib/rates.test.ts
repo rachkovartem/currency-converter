@@ -45,6 +45,17 @@ describe('formatNumber()', () => {
     expect(formatNumber(1.23456, 4)).toBe('1.2346')
     expect(formatNumber(1.23, 0)).toBe('1')
   })
+
+  it('strips trailing fractional zeros (100.00 renders as 100)', () => {
+    expect(formatNumber(100, 2)).toBe('100')
+    expect(formatNumber(1000, 2)).toBe('1,000')
+    expect(formatNumber(0, 2)).toBe('0')
+  })
+
+  it('keeps real decimals when present (100.50 renders as 100.5)', () => {
+    expect(formatNumber(100.5, 2)).toBe('100.5')
+    expect(formatNumber(1.23, 2)).toBe('1.23')
+  })
 })
 
 describe('makeSeries()', () => {

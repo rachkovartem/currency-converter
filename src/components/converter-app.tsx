@@ -20,6 +20,11 @@ import { HistoryScreen } from '@/components/history-screen'
 import { RecentsOverlay } from '@/components/recents-overlay'
 import { SettingsSheet } from '@/components/settings-sheet'
 
+const ZERO_DECIMAL_CURRENCIES = new Set([
+  'BIF', 'CLP', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW',
+  'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+])
+
 interface ConverterAppProps {
   initialRates: Record<string, number>
   ratesDate: string
@@ -73,11 +78,8 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
     }
   }, [activeCode, activeValue, rates])
 
-  const decimals = (code: string): number => {
-    const v = parseFloat(valueFor(code)) || 0
-    if (code === 'JPY' || code === 'KRW') return 0
-    return v < 10 ? 4 : 2
-  }
+  const decimals = (code: string): number =>
+    ZERO_DECIMAL_CURRENCIES.has(code) ? 0 : 2
 
   const handleSwap = (code: string) => {
     const v = valueFor(code)
@@ -100,6 +102,7 @@ export function ConverterApp({ initialRates, ratesDate }: ConverterAppProps) {
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
+        width: '100%',
       }}
     >
       <Header ratesDate={ratesDate} />

@@ -50,7 +50,7 @@ export function convert(
 export function formatNumber(n: number, decimals = 2): string {
   if (!isFinite(n)) return ''
   return n.toLocaleString('en-US', {
-    minimumFractionDigits: decimals,
+    minimumFractionDigits: 0,
     maximumFractionDigits: decimals,
   })
 }

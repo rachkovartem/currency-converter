@@ -4,6 +4,20 @@ import { ConverterApp } from '@/components/converter-app'
 import { useConverterStore } from '@/store/converter-store'
 import { RecentConversion } from '@/lib/types'
 
+// Mock ResizeObserver — required because CurrencyListRow uses it for DOM-based collapse detection; call callback immediately
+class MockResizeObserver {
+  private _cb: ResizeObserverCallback
+  observe = vi.fn().mockImplementation((el: Element) => {
+    Object.defineProperty(el, 'offsetWidth', { value: 380, configurable: true })
+    this._cb([], this as unknown as ResizeObserver)
+  })
+  disconnect = vi.fn()
+  constructor(cb: ResizeObserverCallback) {
+    this._cb = cb
+  }
+}
+vi.stubGlobal('ResizeObserver', MockResizeObserver)
+
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
@@ -128,6 +142,32 @@ describe('ConverterApp', () => {
     render(<ConverterApp initialRates={customRates} ratesDate="2026-05-02" />)
     await waitFor(() => {
       expect(useConverterStore.getState().rates.EUR).toBe(0.9999)
+    })
+  })
+
+  it('uses decimals=0 for JPY (zero-decimal currency)', async () => {
+    // With USD active at 100, JPY should display as a whole number (no fractional digits)
+    useConverterStore.setState({ _hasHydrated: true })
+    render(<ConverterApp {...defaultProps} />)
+
+    await waitFor(() => {
+      const jpyInput = screen.getByTestId('currency-input-JPY') as HTMLInputElement
+      const val = jpyInput.value
+      // Value must not contain a decimal point — JPY is a zero-decimal currency
+      expect(val).not.toContain('.')
+    })
+  })
+
+  it('uses decimals=2 for EUR (standard currency)', async () => {
+    // EUR should be allowed to display fractional digits
+    useConverterStore.setState({ _hasHydrated: true, activeValue: '100.55', activeCode: 'USD' })
+    render(<ConverterApp {...defaultProps} />)
+
+    await waitFor(() => {
+      const eurInput = screen.getByTestId('currency-input-EUR') as HTMLInputElement
+      // 100.55 * 0.92 = 92.506 — should have decimal digits for EUR
+      expect(parseFloat(eurInput.value.replace(/,/g, ''))).toBeGreaterThan(0)
+      expect(eurInput.value).toContain('.')
     })
   })
 })

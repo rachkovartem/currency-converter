@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useState, useLayoutEffect } from 'react'
 import { GripVertical, Trash2 } from 'lucide-react'
 import { Currency } from '@/lib/types'
 import { FlagAvatar } from '@/components/ui/flag-avatar'
@@ -51,9 +52,97 @@ export function CurrencyListRow({
 
   // Dynamic font size: shrink for very long numbers
   const valueFontSize =
-    len > 14 ? 'clamp(13px, 3.8vw, 17px)' :
-    len > 10 ? 'clamp(15px, 4.5vw, 20px)' :
+    len > 16 ? 'clamp(13px, 3.8vw, 17px)' :
+    len > 13 ? 'clamp(15px, 4.5vw, 20px)' :
     inputFs
+
+  // collapseLevel: 0 = all visible, 1 = sparkline hidden, 2 = +name hidden, 3 = +flag hidden
+  const [collapseLevel, setCollapseLevel] = useState(0)
+  const rowRef = useRef<HTMLDivElement>(null)
+
+  // Refs for key DOM elements
+  const dragRef         = useRef<HTMLDivElement>(null)
+  const buttonRef       = useRef<HTMLButtonElement>(null)
+  const flagWrapRef     = useRef<HTMLDivElement>(null)
+  const nameRef         = useRef<HTMLDivElement>(null)
+  const sparklineWrapRef = useRef<HTMLDivElement>(null)
+  const valueSizerRef   = useRef<HTMLSpanElement>(null)
+
+  // Cache natural widths of optional elements (set when visible, reused when collapsed)
+  const natW = useRef({ flag: 36, name: 80, sparkline: 52 })
+
+  useLayoutEffect(() => {
+    const row = rowRef.current
+    if (!row) return
+
+    const compute = () => {
+      const rowW = row.offsetWidth
+      if (!rowW) return
+
+      // — Read actual gap from computed CSS (not resolveClamp) —
+      const gap = parseFloat(getComputedStyle(row).gap) || 8
+
+      // — Drag handle actual width from DOM —
+      const dragW = dragRef.current?.offsetWidth ?? 30
+
+      // — Update stored natural widths when those elements are currently visible —
+      if (collapseLevel < 3 && flagWrapRef.current?.offsetWidth)
+        natW.current.flag = flagWrapRef.current.offsetWidth
+      if (collapseLevel < 2 && nameRef.current?.scrollWidth)
+        natW.current.name = nameRef.current.scrollWidth
+      if (collapseLevel < 1 && sparklineWrapRef.current?.offsetWidth)
+        natW.current.sparkline = sparklineWrapRef.current.offsetWidth
+
+      // — Value text width from hidden DOM span (uses real Inter font) —
+      const valueTextW = valueSizerRef.current?.offsetWidth ?? 60
+      const valueNeedsW = valueTextW + 6  // +6px comfort margin
+
+      // — Compute allocation for each collapse level —
+      // Layout: [drag] [gap] [button flex:1] [gap] [sparkline?] [gap?] [value flex:1 marginLeft:8]
+      // Both button and value have flex:1 (base=0), so they share free space equally.
+      // value content width = freeSpace/2 - 8 (because marginLeft:8 is part of value's outer size)
+      // button content width = freeSpace/2
+
+      const freeWithSparkline    = rowW - dragW - natW.current.sparkline - gap * 3 - 8
+      const freeWithoutSparkline = rowW - dragW - 0                      - gap * 2 - 8
+
+      const val0 = freeWithSparkline    / 2 - 8   // value width at level 0
+      const val1 = freeWithoutSparkline / 2 - 8   // value width at level 1+
+      const btn0 = freeWithSparkline    / 2        // button width at level 0
+      const btn1 = freeWithoutSparkline / 2        // button width at level 1+
+
+      // — Button content thresholds —
+      const { flag: flagW } = natW.current
+      const codeW = 45  // currency code is always 3 chars at ~15px bold ≈ 45px max
+      const MIN_NAME_PX = 20  // minimum visible name width before full collapse (~2 chars)
+      const btnNeedsAll    = flagW + codeW + MIN_NAME_PX + 8
+      const btnNeedsNoName = flagW + codeW + 8            // flag+gap+code only
+
+      // — Sequential level check (minimum level where everything fits) —
+      // Level 0: sparkline + name + flag all visible
+      if (val0 >= valueNeedsW && btn0 >= btnNeedsAll) {
+        setCollapseLevel(0)
+        return
+      }
+      // Level 1: sparkline hidden, name + flag visible
+      if (val1 >= valueNeedsW && btn1 >= btnNeedsAll) {
+        setCollapseLevel(1)
+        return
+      }
+      // Level 2: sparkline + name hidden, flag visible
+      if (val1 >= valueNeedsW && btn1 >= btnNeedsNoName) {
+        setCollapseLevel(2)
+        return
+      }
+      // Level 3: sparkline + name + flag hidden
+      setCollapseLevel(3)
+    }
+
+    compute()
+    const ro = new ResizeObserver(compute)
+    ro.observe(row)
+    return () => ro.disconnect()
+  }, [displayValue, collapseLevel, density, sparkline, showFlag])
 
   return (
     <div style={{
@@ -84,6 +173,7 @@ export function CurrencyListRow({
 
       {/* Main card */}
       <div
+        ref={rowRef}
         {...handlers}
         onClick={(e) => {
           if (Math.abs(dx) > 4) {
@@ -108,6 +198,7 @@ export function CurrencyListRow({
       >
         {/* Drag handle — always visible */}
         <div
+          ref={dragRef}
           {...(dragHandlers ?? {})}
           style={{
             color: 'var(--cc-text-subtle)',
@@ -123,6 +214,7 @@ export function CurrencyListRow({
 
         {/* Flag + code (tappable to swap) */}
         <button
+          ref={buttonRef}
           onClick={(e) => {
             e.stopPropagation()
             onSwap()
@@ -136,18 +228,20 @@ export function CurrencyListRow({
             gap: 8,
             padding: 0,
             minWidth: 0,
-            flexShrink: 1,
+            flex: 1,
             overflow: 'hidden',
           }}
         >
-          {/* Flag avatar wrapper — collapses at level 2 (len ≥ 12) */}
-          <div style={{
-            maxWidth: len >= 12 ? 0 : 40,
-            overflow: 'hidden',
-            opacity: len >= 12 ? 0 : 1,
-            flexShrink: 0,
-            transition: 'max-width 180ms ease, opacity 140ms ease',
-          }}>
+          {/* Flag avatar wrapper — collapses at level 3 */}
+          <div
+            ref={flagWrapRef}
+            style={{
+              maxWidth: collapseLevel >= 3 ? 0 : 40,
+              overflow: 'hidden',
+              opacity: collapseLevel >= 3 ? 0 : 1,
+              flexShrink: 0,
+              transition: 'max-width 180ms ease, opacity 140ms ease',
+            }}>
             <FlagAvatar currency={currency} size={32} showFlag={showFlag} />
           </div>
 
@@ -164,8 +258,9 @@ export function CurrencyListRow({
             >
               {currency.code}
             </div>
-            {/* Currency name — collapses at level 1 (len ≥ 8) */}
+            {/* Currency name — collapses at level 2 */}
             <div
+              ref={nameRef}
               style={{
                 fontSize: 11,
                 color: 'var(--cc-text-muted)',
@@ -174,8 +269,8 @@ export function CurrencyListRow({
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                maxWidth: len >= 8 ? 0 : 120,
-                opacity: len >= 8 ? 0 : 1,
+                maxWidth: collapseLevel >= 2 ? 0 : 120,
+                opacity: collapseLevel >= 2 ? 0 : 1,
                 transition: 'max-width 180ms ease, opacity 140ms ease',
               }}
             >
@@ -184,18 +279,19 @@ export function CurrencyListRow({
           </div>
         </button>
 
-        {/* Sparkline wrapper — collapses at level 2 (len ≥ 12) */}
+        {/* Sparkline wrapper — collapses at level 1 */}
         {sparkline && (
-          <div style={{
-            marginLeft: 'auto',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            maxWidth: len >= 12 ? 0 : 48,
-            overflow: 'hidden',
-            opacity: len >= 12 ? 0 : 1,
-            transition: 'max-width 180ms ease, opacity 140ms ease',
-          }}>
+          <div
+            ref={sparklineWrapRef}
+            style={{
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              maxWidth: collapseLevel >= 1 ? 0 : 48,
+              overflow: 'hidden',
+              opacity: collapseLevel >= 1 ? 0 : 1,
+              transition: 'max-width 180ms ease, opacity 140ms ease',
+            }}>
             <Sparkline
               data={SERIES[currency.code] ?? []}
               width={40}
@@ -208,13 +304,31 @@ export function CurrencyListRow({
         {/* Value input — flex:1 to grow into freed space */}
         <div
           style={{
-            marginLeft: (sparkline && len < 12) ? 8 : 'auto',
-            flexShrink: 0,
-            textAlign: 'right',
+            marginLeft: 8,
             flex: 1,
+            textAlign: 'right',
             minWidth: 0,
+            position: 'relative',
           }}
         >
+          {/* Hidden sizer span — measures value text width using real browser font */}
+          <span
+            ref={valueSizerRef}
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              visibility: 'hidden',
+              pointerEvents: 'none',
+              whiteSpace: 'nowrap',
+              fontSize: valueFontSize,
+              fontWeight: 600,
+              letterSpacing: '-0.6px',
+              fontVariantNumeric: 'tabular-nums',
+              fontFamily: 'inherit',
+            }}
+          >
+            {displayValue}
+          </span>
           <div
             style={{
               fontSize: 11,
