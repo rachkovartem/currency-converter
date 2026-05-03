@@ -267,7 +267,7 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
             </div>
           )}
 
-          {!focusMode && <AddCurrencyButton />}
+          <AddCurrencyButton />
           {!focusMode && <FavoritesSection />}
 
           {/* Updated timestamp */}
