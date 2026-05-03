@@ -20,7 +20,7 @@ export function FloatingSwapPill() {
       data-testid="swap-pill"
       style={{
         position: 'fixed',
-        bottom: 32,
+        bottom: 'calc(32px + env(safe-area-inset-bottom))',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 30,

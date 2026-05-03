@@ -159,7 +159,7 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
       {focusMode && (
         <div
           style={{
-            position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+            position: 'fixed', bottom: 'calc(32px + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)',
             zIndex: 31, maxWidth: 500, width: '100%',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '0 clamp(6px, 3vw, 12px)',
