@@ -152,6 +152,7 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
         display: 'flex',
         flexDirection: 'column',
         width: '100%',
+        paddingTop: 'env(safe-area-inset-top)',
       }}
     >
       {!focusMode && <Header />}
