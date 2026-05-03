@@ -24,7 +24,8 @@ interface CurrencyListRowProps {
   dragHandlers?: {
     onPointerDown: (e: React.PointerEvent) => void
     onPointerMove: (e: React.PointerEvent) => void
-    onPointerUp: () => void
+    onPointerUp: ((e: React.PointerEvent) => void) | (() => void)
+    onPointerCancel?: ((e: React.PointerEvent) => void) | (() => void)
   }
 }
 
@@ -207,6 +208,7 @@ export function CurrencyListRow({
             display: 'flex',
             alignItems: 'center',
             padding: '4px 0',
+            touchAction: 'none',
           }}
         >
           <GripVertical size={18} />
