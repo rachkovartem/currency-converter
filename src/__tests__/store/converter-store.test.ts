@@ -7,7 +7,6 @@ beforeEach(() => {
     rows: ['USD', 'EUR', 'GBP', 'JPY'],
     activeCode: 'USD',
     activeValue: '100',
-    favorites: ['EUR'],
     recents: [],
     layout: 'list',
     density: 'compact',
@@ -72,16 +71,6 @@ describe('removeCurrency()', () => {
     const { activeCode, rows } = useConverterStore.getState()
     expect(activeCode).toBe(rows[0])
     expect(activeCode).not.toBe('EUR')
-  })
-})
-
-describe('toggleFavorite()', () => {
-  it('adds then removes favorite', () => {
-    useConverterStore.setState({ favorites: [] })
-    useConverterStore.getState().toggleFavorite('USD')
-    expect(useConverterStore.getState().favorites).toContain('USD')
-    useConverterStore.getState().toggleFavorite('USD')
-    expect(useConverterStore.getState().favorites).not.toContain('USD')
   })
 })
 

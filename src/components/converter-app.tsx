@@ -13,7 +13,6 @@ import { Header } from '@/components/header'
 import { CurrencyListRow } from '@/components/currency-list-row'
 import { CurrencyGridTile } from '@/components/currency-grid-tile'
 import { AddCurrencyButton } from '@/components/add-currency-button'
-import { FavoritesSection } from '@/components/favorites-section'
 import { FloatingSwapPill } from '@/components/floating-swap-pill'
 import { EmptyState } from '@/components/empty-state'
 import { PickerSheet } from '@/components/picker-sheet'
@@ -270,7 +269,6 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
           )}
 
           <AddCurrencyButton />
-          {!focusMode && <FavoritesSection />}
 
           {/* Updated timestamp */}
           {!focusMode && (

@@ -36,7 +36,6 @@ const defaultState = {
   rows: ['USD', 'EUR', 'GBP', 'JPY'] as string[],
   activeCode: 'USD',
   activeValue: '100',
-  favorites: [] as string[],
   recents: [] as RecentConversion[],
   rates: {
     USD: 1, EUR: 0.92, GBP: 0.79, JPY: 156.4,

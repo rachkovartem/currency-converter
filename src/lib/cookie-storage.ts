@@ -38,7 +38,6 @@ export type PersistedConverterState = {
   rows: string[]
   activeCode: string
   activeValue: string
-  favorites: string[]
   recents: {
     from: string
     to: string

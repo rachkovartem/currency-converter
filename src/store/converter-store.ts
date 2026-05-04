@@ -12,7 +12,6 @@ interface ConverterState {
   rows: CurrencyCode[]
   activeCode: CurrencyCode
   activeValue: string
-  favorites: CurrencyCode[]
   recents: RecentConversion[]
   rates: Record<CurrencyCode, number>
   updatedAt: number
@@ -35,7 +34,6 @@ interface ConverterState {
   setActiveRow: (code: CurrencyCode) => void
   setActiveValue: (value: string) => void
   reorderRows: (rows: CurrencyCode[]) => void
-  toggleFavorite: (code: CurrencyCode) => void
   updateRates: (rates: Record<CurrencyCode, number>) => void
   setLayout: (layout: 'list' | 'grid') => void
   setDensity: (density: 'compact' | 'comfortable') => void
@@ -61,7 +59,6 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         rows: ['USD', 'EUR', 'GBP', 'JPY'],
         activeCode: 'USD',
         activeValue: '100',
-        favorites: ['EUR'],
         recents: [
           { from: 'USD', to: 'EUR', amount: 250, ts: Date.now() - 1000 * 60 * 22 },
           { from: 'GBP', to: 'JPY', amount: 50, ts: Date.now() - 1000 * 60 * 60 * 3 },
@@ -98,11 +95,6 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         setActiveRow: (code) => set({ activeCode: code }),
         setActiveValue: (value) => set({ activeValue: value }),
         reorderRows: (rows) => set({ rows }),
-        toggleFavorite: (code) => set((state) => ({
-          favorites: state.favorites.includes(code)
-            ? state.favorites.filter(c => c !== code)
-            : [...state.favorites, code],
-        })),
         updateRates: (rates) => set({ rates, updatedAt: Date.now() }),
         setLayout: (layout) => set({ layout }),
         setDensity: (density) => set({ density }),
@@ -140,7 +132,7 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         skipHydration: true,
         partialize: (state) => {
           const persistedKeys: (keyof ConverterState)[] = [
-            'rows', 'activeCode', 'activeValue', 'favorites', 'recents',
+            'rows', 'activeCode', 'activeValue', 'recents',
             'layout', 'density', 'showFlags', 'focusMode',
             // settingsOpen, pickerOpen, historyPair, showRecents, recentCurrencies are NOT persisted here
           ]
