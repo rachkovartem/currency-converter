@@ -314,7 +314,11 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
 export function ConverterApp({ initialRates, ratesUpdatedAt, initialState }: ConverterAppProps) {
   // Create a per-request store seeded with the server-provided cookie state.
   // useState lazy initialiser runs once and is safe to read during render.
-  const [store] = useState<ConverterStore>(() => createConverterStore(initialState ?? undefined))
+  const [store] = useState<ConverterStore>(() => {
+    const s = createConverterStore(initialState ?? undefined)
+    s.setState({ rates: initialRates, updatedAt: ratesUpdatedAt })
+    return s
+  })
 
   return (
     <ConverterStoreContext.Provider value={store}>
