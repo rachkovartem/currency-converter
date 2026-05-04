@@ -25,6 +25,7 @@ const RSVG = '/opt/homebrew/bin/rsvg-convert'
 const SOURCE_SVG = '/Users/artemrachkov/Downloads/Gemini_Generated_Image_z5lb5zz5lb5zz5lb (1).svg'
 const TEMP_SQUARE_SVG = '/tmp/logo-square.svg'
 const BG_NAVY = { r: 27, g: 70, b: 136, alpha: 1 }
+const BG_APP  = { r: 8, g: 8, b: 12, alpha: 1 }
 
 // Background rectangle path segment to strip from path 4's d attribute
 const BG_RECT_SEGMENT =
@@ -237,6 +238,35 @@ async function main() {
   for (const dest of icoTargets) {
     writeFileSync(dest, icoBuffer)
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${icoBuffer.length} bytes, multi-size 16+32+48+64)`)
+  }
+
+  // ── Step 7: iOS splash screens ──────────────────────────────────────────────
+  console.log('Generating iOS splash screens...')
+
+  const splashDir = path.join(publicDir, 'splash')
+  ensureDir(splashDir)
+
+  const splashTargets = [
+    { w: 1290, h: 2796, file: 'splash-1290x2796.png' },
+    { w: 1170, h: 2532, file: 'splash-1170x2532.png' },
+    { w: 1125, h: 2436, file: 'splash-1125x2436.png' },
+    { w:  828, h: 1792, file: 'splash-828x1792.png'  },
+    { w:  750, h: 1334, file: 'splash-750x1334.png'  },
+    { w: 2048, h: 2732, file: 'splash-2048x2732.png' },
+    { w: 1668, h: 2388, file: 'splash-1668x2388.png' },
+  ]
+
+  for (const { w, h, file } of splashTargets) {
+    const logoSize = Math.round(Math.min(w, h) * 0.35)
+    const logoPng = execSync(`"${RSVG}" -w ${logoSize} -h ${logoSize} "${TEMP_SQUARE_SVG}"`)
+    const dest = path.join(splashDir, file)
+    await sharp({
+      create: { width: w, height: h, channels: 4, background: BG_APP },
+    })
+      .composite([{ input: logoPng, gravity: 'center' }])
+      .png()
+      .toFile(dest)
+    console.log(`  Written: public/splash/${file} (${w}x${h})`)
   }
 
   // ── Done ─────────────────────────────────────────────────────────────────────
