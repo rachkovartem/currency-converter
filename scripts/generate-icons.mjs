@@ -24,6 +24,7 @@ const sharp = require(path.join(PROJECT_ROOT, 'node_modules/sharp'))
 const RSVG = '/opt/homebrew/bin/rsvg-convert'
 const SOURCE_SVG = '/Users/artemrachkov/Downloads/Gemini_Generated_Image_z5lb5zz5lb5zz5lb (1).svg'
 const TEMP_SQUARE_SVG = '/tmp/logo-square.svg'
+const BG_NAVY = { r: 27, g: 70, b: 136, alpha: 1 }
 
 // Background rectangle path segment to strip from path 4's d attribute
 const BG_RECT_SEGMENT =
@@ -162,18 +163,27 @@ async function main() {
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${size}x${size})`)
   }
 
-  // ── Step 4: Transparent square icons ────────────────────────────────────────
-  console.log('Generating transparent square icons...')
+  // ── Step 4: PWA / Apple icons — navy background ─────────────────────────────
+  // Android and iOS use these as launcher icons. Transparent background causes
+  // the white logo to be invisible on white launcher backgrounds.
+  console.log('Generating PWA/Apple icons (navy background)...')
 
-  const squareIconTargets = [
+  const pwaIconTargets = [
     { size: 180, dest: path.join(publicDir, 'apple-touch-icon.png') },
     { size: 192, dest: path.join(iconsDir, 'icon-192.png') },
     { size: 512, dest: path.join(iconsDir, 'icon-512.png') },
     { size: 180, dest: path.join(appDir, 'apple-icon.png') },
   ]
 
-  for (const { size, dest } of squareIconTargets) {
-    rsvgToPng(TEMP_SQUARE_SVG, dest, size, size)
+  for (const { size, dest } of pwaIconTargets) {
+    const logoSize = Math.round(size * 0.75)
+    const logoPng = execSync(`"${RSVG}" -w ${logoSize} -h ${logoSize} "${TEMP_SQUARE_SVG}"`)
+    await sharp({
+      create: { width: size, height: size, channels: 4, background: BG_NAVY },
+    })
+      .composite([{ input: logoPng, gravity: 'center' }])
+      .png()
+      .toFile(dest)
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${size}x${size})`)
   }
 
