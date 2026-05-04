@@ -25,7 +25,6 @@ interface ConverterState {
   recentCurrencies: CurrencyCode[]
   // Overlay state (not persisted)
   pickerOpen: boolean
-  historyPair: { from: CurrencyCode; to: CurrencyCode } | null
   showRecents: boolean
   settingsOpen: boolean
   // Actions
@@ -40,8 +39,6 @@ interface ConverterState {
   setShowFlags: (show: boolean) => void
   openPicker: () => void
   closePicker: () => void
-  openHistory: (pair: { from: CurrencyCode; to: CurrencyCode }) => void
-  closeHistory: () => void
   openRecents: () => void
   closeRecents: () => void
   pickRecent: (recent: RecentConversion) => void
@@ -73,7 +70,6 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         focusMode: false,
         recentCurrencies: [],
         pickerOpen: false,
-        historyPair: null,
         showRecents: false,
         settingsOpen: false,
         ...(initialState ?? {}),
@@ -101,8 +97,6 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
         setShowFlags: (showFlags) => set({ showFlags }),
         openPicker: () => set({ pickerOpen: true }),
         closePicker: () => set({ pickerOpen: false }),
-        openHistory: (pair) => set({ historyPair: pair }),
-        closeHistory: () => set({ historyPair: null }),
         openRecents: () => set({ showRecents: true }),
         closeRecents: () => set({ showRecents: false }),
         openSettings: () => set({ settingsOpen: true }),
@@ -134,7 +128,7 @@ export function createConverterStore(initialState?: Partial<PersistedConverterSt
           const persistedKeys: (keyof ConverterState)[] = [
             'rows', 'activeCode', 'activeValue', 'recents',
             'layout', 'density', 'showFlags', 'focusMode',
-            // settingsOpen, pickerOpen, historyPair, showRecents, recentCurrencies are NOT persisted here
+            // settingsOpen, pickerOpen, showRecents, recentCurrencies are NOT persisted here
           ]
           return Object.fromEntries(
             persistedKeys.map(k => [k, state[k]])

@@ -51,7 +51,6 @@ const defaultState = {
   density: 'compact' as const,
   showFlags: true,
   pickerOpen: false,
-  historyPair: null,
   showRecents: false,
   settingsOpen: false,
 }

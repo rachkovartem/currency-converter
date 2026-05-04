@@ -17,25 +17,6 @@ export const MOCK_RATES: Record<string, number> = {
   SHP: 0.79, SLE: 22.5, SSP: 1305, TVD: 1.51, ZWL: 361,
 }
 
-// Generate a deterministic 30-point sparkline series for each pair (vs USD)
-export function makeSeries(code: string, points = 30): number[] {
-  let seed = 0
-  for (let i = 0; i < code.length; i++) seed = (seed * 31 + code.charCodeAt(i)) >>> 0
-  const base = MOCK_RATES[code] ?? 1
-  const out: number[] = []
-  for (let i = 0; i < points; i++) {
-    seed = (seed * 1664525 + 1013904223) >>> 0
-    const noise = ((seed % 1000) / 1000 - 0.5) * 0.04 // ±2%
-    const drift = Math.sin(i / 4 + code.charCodeAt(0)) * 0.015
-    out.push(base * (1 + noise + drift))
-  }
-  return out
-}
-
-export const SERIES: Record<string, number[]> = Object.fromEntries(
-  Object.keys(MOCK_RATES).map(c => [c, makeSeries(c)])
-)
-
 // Convert via USD pivot: amount * (rate[to] / rate[from])
 export function convert(
   amount: number,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { convert, formatNumber, makeSeries, MOCK_RATES } from '@/lib/rates'
+import { convert, formatNumber, MOCK_RATES } from '@/lib/rates'
 
 describe('convert()', () => {
   it('USD to EUR converts correctly', () => {
@@ -58,24 +58,3 @@ describe('formatNumber()', () => {
   })
 })
 
-describe('makeSeries()', () => {
-  it('returns correct length array', () => {
-    expect(makeSeries('USD', 30)).toHaveLength(30)
-    expect(makeSeries('EUR', 7)).toHaveLength(7)
-  })
-
-  it('is deterministic', () => {
-    const a = makeSeries('EUR', 30)
-    const b = makeSeries('EUR', 30)
-    expect(a).toEqual(b)
-  })
-
-  it('values are within reasonable range of base rate', () => {
-    const series = makeSeries('EUR', 30)
-    const base = MOCK_RATES.EUR
-    for (const v of series) {
-      expect(v).toBeGreaterThan(base * 0.9)
-      expect(v).toBeLessThan(base * 1.1)
-    }
-  })
-})

@@ -12,7 +12,6 @@ beforeEach(() => {
     density: 'compact',
     showFlags: true,
     pickerOpen: false,
-    historyPair: null,
     showRecents: false,
     settingsOpen: false,
   })

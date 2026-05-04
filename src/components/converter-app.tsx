@@ -16,7 +16,6 @@ import { AddCurrencyButton } from '@/components/add-currency-button'
 import { FloatingSwapPill } from '@/components/floating-swap-pill'
 import { EmptyState } from '@/components/empty-state'
 import { PickerSheet } from '@/components/picker-sheet'
-import { HistoryScreen } from '@/components/history-screen'
 import { RecentsOverlay } from '@/components/recents-overlay'
 import { SettingsSheet } from '@/components/settings-sheet'
 
@@ -299,7 +298,6 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
 
       {/* Overlays */}
       <PickerSheet />
-      <HistoryScreen />
       <RecentsOverlay />
       <SettingsSheet />
     </div>
