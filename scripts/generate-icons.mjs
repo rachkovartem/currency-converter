@@ -175,18 +175,21 @@ async function main() {
   writeFileSync(TEMP_SQUARE_SVG, squareSvg, 'utf8')
   console.log('  Written: /tmp/logo-square.svg')
 
-  // ── Step 3: Transparent PNGs (square-crop) ───────────────────────────────────
-  console.log('Generating transparent favicon PNGs...')
+  // ── Step 3: Navy-background favicon PNGs (square-crop) ──────────────────────
+  // Render the square-crop SVG onto a navy canvas (#1B4688) so the near-white
+  // logo path (#FAFEFA) has maximum contrast at small sizes (16–48px) and
+  // matches the style of icon-192/icon-512.
+  console.log('Generating navy-background favicon PNGs...')
 
-  const transparentSizes = [
+  const faviconSizes = [
     { size: 16, dest: path.join(publicDir, 'favicon-16.png') },
     { size: 32, dest: path.join(publicDir, 'favicon-32.png') },
     { size: 48, dest: path.join(publicDir, 'favicon-48.png') },
     { size: 32, dest: path.join(appDir, 'icon.png') },
   ]
 
-  for (const { size, dest } of transparentSizes) {
-    rsvgToPng(TEMP_SQUARE_SVG, dest, size, size)
+  for (const { size, dest } of faviconSizes) {
+    await compositeOnBg(TEMP_SQUARE_SVG, size, size, size, size, dest, BG_NAVY)
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${size}x${size})`)
   }
 
