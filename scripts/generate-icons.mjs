@@ -24,6 +24,7 @@ const sharp = require(path.join(PROJECT_ROOT, 'node_modules/sharp'))
 const RSVG = '/opt/homebrew/bin/rsvg-convert'
 const SOURCE_SVG = '/Users/artemrachkov/Downloads/Gemini_Generated_Image_z5lb5zz5lb5zz5lb (1).svg'
 const TEMP_SQUARE_SVG = '/tmp/logo-square.svg'
+const TEMP_SQUARE_WITH_BG = '/tmp/logo-square-with-bg.svg'
 const BG_WHITE = { r: 255, g: 255, b: 255, alpha: 1 }
 const BG_NAVY  = { r: 27,  g: 70,  b: 136, alpha: 1 }
 
@@ -175,11 +176,24 @@ async function main() {
   writeFileSync(TEMP_SQUARE_SVG, squareSvg, 'utf8')
   console.log('  Written: /tmp/logo-square.svg')
 
-  // ── Step 3: Navy-background favicon PNGs (square-crop) ──────────────────────
-  // Render the square-crop SVG onto a navy canvas (#1B4688) so the near-white
-  // logo path (#FAFEFA) has maximum contrast at small sizes (16–48px) and
-  // matches the style of icon-192/icon-512.
-  console.log('Generating navy-background favicon PNGs...')
+  // Square-crop SVG WITH white background for colorful favicons.
+  // Use the ORIGINAL source SVG (background rect still present) and only
+  // change the viewBox + dimensions for square crop. The white background rect
+  // inside path 4 fills the entire viewBox → colored paths (dark blue, teal,
+  // green) are visible on top of the white background.
+  const squareWithBgSvg = sourceSvg
+    .replace('viewBox="0 0 1387 756"', 'viewBox="500 178 400 400"')
+    .replace('width="1387"', 'width="400"')
+    .replace('height="756"', 'height="400"')
+  writeFileSync(TEMP_SQUARE_WITH_BG, squareWithBgSvg, 'utf8')
+  console.log('  Written: /tmp/logo-square-with-bg.svg')
+
+  // ── Step 3: Colorful favicon PNGs (white background from original SVG) ──────
+  // Use the square-crop SVG that retains the original white background rect so
+  // the colored paths (dark blue #1B4688, teal #5D9B9C, green #78DDA5) are
+  // fully visible. Do NOT composite on a navy canvas — the white background is
+  // already embedded in the SVG.
+  console.log('Generating colorful favicon PNGs...')
 
   const faviconSizes = [
     { size: 16, dest: path.join(publicDir, 'favicon-16.png') },
@@ -189,7 +203,7 @@ async function main() {
   ]
 
   for (const { size, dest } of faviconSizes) {
-    await compositeOnBg(TEMP_SQUARE_SVG, size, size, size, size, dest, BG_NAVY)
+    rsvgToPng(TEMP_SQUARE_WITH_BG, dest, size, size)
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${size}x${size})`)
   }
 
