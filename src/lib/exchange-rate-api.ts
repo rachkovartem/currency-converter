@@ -31,7 +31,7 @@ export async function fetchRates(): Promise<RatesResult> {
     const res = await fetch(
       `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`,
       {
-        next: { revalidate: 86400 }, // 24h Next.js ISR cache — shared across all users
+        next: { revalidate: 10800 }, // 3h Next.js ISR cache — shared across all users
       }
     )
 

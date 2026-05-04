@@ -42,7 +42,7 @@ describe('fetchRates', () => {
     await fetchRates()
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
       'https://v6.exchangerate-api.com/v6/test-key-123/latest/USD',
-      expect.objectContaining({ next: { revalidate: 86400 } })
+      expect.objectContaining({ next: { revalidate: 10800 } })
     )
   })
 
