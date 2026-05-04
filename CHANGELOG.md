@@ -5,6 +5,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) · Versioning: 
 
 ---
 
+## [1.4.0] — 2026-05-04
+
+### Added
+- **New logo** — replaced all icons with the new brand logo: favicons (16/32/48/64/96px), apple-touch-icon, PWA icons (192/512px), og-image, twitter-image; added `public/logo.svg` and `scripts/generate-icons.mjs` for reproducible regeneration
+- **CSP headers** — `next.config.ts` now sets Content-Security-Policy, X-Frame-Options, X-Content-Type-Options and Referrer-Policy for all routes
+
+### Fixed
+- **Google Analytics** — production CSP was blocking `googletagmanager.com` and `google-analytics.com`; GA4 now loads and sends events correctly
+
+### Removed
+- **Favorites section** — removed unused UI block and related store state
+- **History screen** — removed unreachable screen after favorites removal; deleted `e2e/history.spec.ts`
+
+---
+
 ## [1.3.0] — 2026-05-04
 
 ### Added
