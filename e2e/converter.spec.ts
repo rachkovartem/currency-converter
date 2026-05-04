@@ -9,6 +9,12 @@ const MOCK_RATES_RESPONSE = {
 }
 
 test.beforeEach(async ({ page }) => {
+  // ⚠️ Block service worker registration — the SW uses NetworkFirst with a
+  // 5-second timeout; on slow CI machines the dev server may not respond in
+  // time, causing the SW to return a stale cached page instead of the fresh
+  // SSR response.  Blocking /sw.js prevents the SW from ever installing.
+  await page.route('**/sw.js', route => route.abort())
+
   // ⚠️ Mock the rates API — never hit real ExchangeRate-API in tests
   await page.route('**/api/rates**', async route => {
     await route.fulfill({
@@ -50,18 +56,16 @@ test.describe('Converter — Main Features', () => {
   })
 
   test('AC-2: grid layout setting is persisted via cookie', async ({ page }) => {
-    // Store persists via cookies (cookieStorage), not localStorage
-    await page.evaluate(() => {
-      const name = 'currency-converter'
-      const existing = document.cookie
-        .split('; ')
-        .find(row => row.startsWith(name + '='))
-      const raw = existing
-        ? JSON.parse(decodeURIComponent(existing.split('=').slice(1).join('=')))
-        : {}
-      raw.state = { ...(raw.state ?? {}), layout: 'grid' }
-      document.cookie = `${name}=${encodeURIComponent(JSON.stringify(raw))}; path=/; max-age=31536000`
-    })
+    // Use Playwright's native addCookies API to set the cookie atomically at the
+    // browser-context level, bypassing document.cookie. This avoids a race condition
+    // where a concurrent useEffect (Zustand persist setItem) could overwrite the
+    // document.cookie write before the page reload sends the request to the server.
+    const cookiePayload = encodeURIComponent(JSON.stringify({ state: { layout: 'grid' }, version: 0 }))
+    await page.context().addCookies([{
+      name: 'currency-converter',
+      value: cookiePayload,
+      url: 'http://localhost:3000',
+    }])
     await page.reload()
     await page.waitForSelector('[data-testid="currency-input-USD"]')
 
