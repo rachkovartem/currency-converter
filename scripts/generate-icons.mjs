@@ -24,8 +24,6 @@ const sharp = require(path.join(PROJECT_ROOT, 'node_modules/sharp'))
 const RSVG = '/opt/homebrew/bin/rsvg-convert'
 const SOURCE_SVG = '/Users/artemrachkov/Downloads/Gemini_Generated_Image_z5lb5zz5lb5zz5lb (1).svg'
 const TEMP_SQUARE_SVG = '/tmp/logo-square.svg'
-const BG_WHITE = { r: 255, g: 255, b: 255, alpha: 1 }
-const BG_NAVY  = { r: 27,  g: 70,  b: 136, alpha: 1 }
 
 // Background rectangle path segment to strip from path 4's d attribute
 const BG_RECT_SEGMENT =
@@ -54,36 +52,6 @@ function rsvgToPng(inputSvg, outputPng, width, height) {
   execSync(`"${RSVG}" -w ${width} -h ${height} -o "${outputPng}" "${inputSvg}"`, { stdio: 'inherit' })
 }
 
-/**
- * Use rsvg-convert to render an SVG file to a PNG Buffer (stdout).
- * @param {string} inputSvg - path to input SVG
- * @param {number} width
- * @param {number} height
- * @returns {Buffer}
- */
-function rsvgToPngBuffer(inputSvg, width, height) {
-  return execSync(`"${RSVG}" -w ${width} -h ${height} "${inputSvg}"`)
-}
-
-/**
- * Composite a transparent logo PNG onto a solid background and write to destPath.
- * @param {string} squareSvgPath                              - path to the square-crop SVG
- * @param {number} logoW                                      - logo render width
- * @param {number} logoH                                      - logo render height
- * @param {number} canvasW                                    - output canvas width
- * @param {number} canvasH                                    - output canvas height
- * @param {string} destPath                                   - output PNG file path
- * @param {{ r: number, g: number, b: number, alpha: number }} bg - background colour
- */
-async function compositeOnBg(squareSvgPath, logoW, logoH, canvasW, canvasH, destPath, bg) {
-  const logoPng = rsvgToPngBuffer(squareSvgPath, logoW, logoH)
-  await sharp({
-    create: { width: canvasW, height: canvasH, channels: 4, background: bg },
-  })
-    .composite([{ input: logoPng, gravity: 'center' }])
-    .png()
-    .toFile(destPath)
-}
 
 /**
  * Pack an array of PNG Buffers into a valid ICO binary.
@@ -194,22 +162,18 @@ async function main() {
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${size}x${size})`)
   }
 
-  // ── Step 4: Dark-background square icons ────────────────────────────────────
-  // Fix Bug 2: use two-step pipeline — rsvg-convert produces a transparent PNG
-  // Buffer, then sharp composites it onto the dark background. This preserves
-  // colors that the base64-in-<image> approach lost.
-  console.log('Generating dark-background square icons...')
+  // ── Step 4: Transparent square icons ────────────────────────────────────────
+  console.log('Generating transparent square icons...')
 
   const squareIconTargets = [
-    { size: 180, dest: path.join(publicDir, 'apple-touch-icon.png'), bg: BG_NAVY  },
-    { size: 192, dest: path.join(iconsDir, 'icon-192.png'),          bg: BG_NAVY  },
-    { size: 512, dest: path.join(iconsDir, 'icon-512.png'),          bg: BG_NAVY  },
-    { size: 180, dest: path.join(appDir, 'apple-icon.png'),          bg: BG_NAVY  },
+    { size: 180, dest: path.join(publicDir, 'apple-touch-icon.png') },
+    { size: 192, dest: path.join(iconsDir, 'icon-192.png') },
+    { size: 512, dest: path.join(iconsDir, 'icon-512.png') },
+    { size: 180, dest: path.join(appDir, 'apple-icon.png') },
   ]
 
-  for (const { size, dest, bg } of squareIconTargets) {
-    const logoSize = Math.round(size * 0.85)
-    await compositeOnBg(TEMP_SQUARE_SVG, logoSize, logoSize, size, size, dest, bg)
+  for (const { size, dest } of squareIconTargets) {
+    rsvgToPng(TEMP_SQUARE_SVG, dest, size, size)
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${size}x${size})`)
   }
 
@@ -218,7 +182,7 @@ async function main() {
 
   const SOCIAL_W = 1200
   const SOCIAL_H = 630
-  const LOGO_SOCIAL = 504 // logo centered on dark canvas
+  const LOGO_SOCIAL = 504 // logo centered on transparent canvas
 
   const socialTargets = [
     path.join(publicDir, 'og-image.png'),
@@ -226,7 +190,13 @@ async function main() {
   ]
 
   for (const dest of socialTargets) {
-    await compositeOnBg(TEMP_SQUARE_SVG, LOGO_SOCIAL, LOGO_SOCIAL, SOCIAL_W, SOCIAL_H, dest, BG_NAVY)
+    const logoPng = execSync(`"${RSVG}" -w ${LOGO_SOCIAL} -h ${LOGO_SOCIAL} "${TEMP_SQUARE_SVG}"`)
+    await sharp({
+      create: { width: SOCIAL_W, height: SOCIAL_H, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+    })
+      .composite([{ input: logoPng, gravity: 'center' }])
+      .png()
+      .toFile(dest)
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${SOCIAL_W}x${SOCIAL_H})`)
   }
 
