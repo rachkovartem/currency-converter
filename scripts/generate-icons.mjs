@@ -24,7 +24,6 @@ const sharp = require(path.join(PROJECT_ROOT, 'node_modules/sharp'))
 const RSVG = '/opt/homebrew/bin/rsvg-convert'
 const SOURCE_SVG = '/Users/artemrachkov/Downloads/Gemini_Generated_Image_z5lb5zz5lb5zz5lb (1).svg'
 const TEMP_SQUARE_SVG = '/tmp/logo-square.svg'
-const TEMP_SQUARE_WITH_BG = '/tmp/logo-square-with-bg.svg'
 const BG_WHITE = { r: 255, g: 255, b: 255, alpha: 1 }
 const BG_NAVY  = { r: 27,  g: 70,  b: 136, alpha: 1 }
 
@@ -176,34 +175,22 @@ async function main() {
   writeFileSync(TEMP_SQUARE_SVG, squareSvg, 'utf8')
   console.log('  Written: /tmp/logo-square.svg')
 
-  // Square-crop SVG WITH white background for colorful favicons.
-  // Use the ORIGINAL source SVG (background rect still present) and only
-  // change the viewBox + dimensions for square crop. The white background rect
-  // inside path 4 fills the entire viewBox → colored paths (dark blue, teal,
-  // green) are visible on top of the white background.
-  const squareWithBgSvg = sourceSvg
-    .replace('viewBox="0 0 1387 756"', 'viewBox="500 178 400 400"')
-    .replace('width="1387"', 'width="400"')
-    .replace('height="756"', 'height="400"')
-  writeFileSync(TEMP_SQUARE_WITH_BG, squareWithBgSvg, 'utf8')
-  console.log('  Written: /tmp/logo-square-with-bg.svg')
-
-  // ── Step 3: Colorful favicon PNGs (white background from original SVG) ──────
-  // Use the square-crop SVG that retains the original white background rect so
-  // the colored paths (dark blue #1B4688, teal #5D9B9C, green #78DDA5) are
-  // fully visible. Do NOT composite on a navy canvas — the white background is
-  // already embedded in the SVG.
+  // ── Step 3: Transparent favicon PNGs (no background rect) ──────────────────
+  // The stripped square SVG (TEMP_SQUARE_SVG) has the background rect removed,
+  // so rsvg-convert renders with alpha transparency by default.
   console.log('Generating colorful favicon PNGs...')
 
   const faviconSizes = [
     { size: 16, dest: path.join(publicDir, 'favicon-16.png') },
     { size: 32, dest: path.join(publicDir, 'favicon-32.png') },
     { size: 48, dest: path.join(publicDir, 'favicon-48.png') },
+    { size: 64, dest: path.join(publicDir, 'favicon-64.png') },
+    { size: 96, dest: path.join(publicDir, 'favicon-96.png') },
     { size: 32, dest: path.join(appDir, 'icon.png') },
   ]
 
   for (const { size, dest } of faviconSizes) {
-    rsvgToPng(TEMP_SQUARE_WITH_BG, dest, size, size)
+    rsvgToPng(TEMP_SQUARE_SVG, dest, size, size)
     console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${size}x${size})`)
   }
 
@@ -251,6 +238,7 @@ async function main() {
     { size: 16, file: path.join(publicDir, 'favicon-16.png') },
     { size: 32, file: path.join(publicDir, 'favicon-32.png') },
     { size: 48, file: path.join(publicDir, 'favicon-48.png') },
+    { size: 64, file: path.join(publicDir, 'favicon-64.png') },
   ]
 
   const icoImages = icoSizes.map(({ size, file }) => ({
@@ -268,7 +256,7 @@ async function main() {
 
   for (const dest of icoTargets) {
     writeFileSync(dest, icoBuffer)
-    console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${icoBuffer.length} bytes, multi-size 16+32+48)`)
+    console.log(`  Written: ${path.relative(PROJECT_ROOT, dest)} (${icoBuffer.length} bytes, multi-size 16+32+48+64)`)
   }
 
   // ── Done ─────────────────────────────────────────────────────────────────────
