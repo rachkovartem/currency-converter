@@ -5,6 +5,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) · Versioning: 
 
 ---
 
+## [1.3.0] — 2026-05-04
+
+### Added
+- **Google Analytics 4** — GA4 tag (G-N6RTGW34E0) added via `next/script` with `strategy="afterInteractive"`
+- **Google Search Console** — verification file added to `public/`
+- **robots.txt** — proper crawl directives with sitemap reference (`src/app/robots.ts`)
+- **sitemap.xml** — homepage entry with daily changefreq (`src/app/sitemap.ts`)
+
+### Improved
+- **SEO score 52 → 92/100** — canonical tag, metadataBase for absolute OG/Twitter image URLs, H1/H2 semantic headings, visually-hidden SEO description and footer links, expanded Schema.org JSON-LD (featureList, screenshot, inLanguage), aria-label on flag avatars, twitter:site/creator, removed duplicate meta tag
+- **Meta description** — updated to 155 chars, unified "140+ currencies" across all metadata
+- **Rates cache** — revalidation reduced from 24h to 3h so displayed timestamp stays fresh
+
+### Fixed
+- **SSR timestamp** — store now seeded with real rates and `updatedAt` synchronously before first render; SSR HTML no longer shows "Rates updated 0s ago"
+
+---
+
 ## [1.2.3] — 2026-05-03
 
 ### Fixed
