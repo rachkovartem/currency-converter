@@ -20,17 +20,17 @@
   "screenshots": [
     {
       "src": "/screenshots/mobile.png",
-      "sizes": "390x844",
+      "sizes": "860x1578",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Currency converter on mobile"
     },
     {
       "src": "/screenshots/mobile-2.png",
-      "sizes": "860x1578",
+      "sizes": "864x1576",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Live exchange rates"
+      "label": "Add any of 140+ currencies"
     },
     {
       "src": "/screenshots/desktop.png",
