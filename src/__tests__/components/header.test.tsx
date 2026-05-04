@@ -19,6 +19,14 @@ beforeEach(() => {
   useConverterStore.setState(baseState)
 })
 
+describe('Header — Convert h1', () => {
+  it('renders an h1 element with text "Convert"', () => {
+    render(<Header />)
+    const h1 = screen.getByRole('heading', { level: 1, name: 'Convert' })
+    expect(h1).toBeTruthy()
+  })
+})
+
 describe('Header — last-updated span', () => {
   it('hides the last-updated span when updatedAt is 0', () => {
     useConverterStore.setState({ ...baseState, updatedAt: 0 })

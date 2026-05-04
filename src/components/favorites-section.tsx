@@ -28,17 +28,18 @@ export function FavoritesSection() {
           marginBottom: 10,
         }}
       >
-        <div
+        <h2
           style={{
             fontSize: 12,
             fontWeight: 700,
             letterSpacing: 0.6,
             textTransform: 'uppercase',
             color: 'var(--cc-text-subtle)',
+            margin: 0,
           }}
         >
           Favorites
-        </div>
+        </h2>
       </div>
 
       <Glass radius={20} padding="6px 12px">

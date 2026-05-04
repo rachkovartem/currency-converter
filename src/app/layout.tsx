@@ -6,6 +6,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://currency.coreplex.cc'),
   title: 'Convert — Currency Converter',
   description: 'Real-time currency converter. Convert USD, EUR, GBP, JPY and 140+ currencies instantly.',
   manifest: '/manifest.json',
@@ -42,6 +43,8 @@ export const metadata: Metadata = {
     title: 'Convert — Currency Converter',
     description: 'Real-time currency converter. Convert 140+ currencies with live exchange rates.',
     images: ['/twitter-image.png'],
+    site: '@coreplex_cc',
+    creator: '@coreplex_cc',
   },
   appleWebApp: {
     capable: true,
@@ -56,9 +59,6 @@ export const metadata: Metadata = {
       { url: '/splash/splash-2048x2732.png', media: '(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)' },
       { url: '/splash/splash-1668x2388.png', media: '(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)' },
     ],
-  },
-  other: {
-    'mobile-web-app-capable': 'yes',
   },
 }
 

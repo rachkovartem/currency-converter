@@ -13,6 +13,8 @@ export function FlagAvatar({ currency, size = 36, showFlag = true }: FlagAvatarP
 
   return (
     <div
+      role="img"
+      aria-label={`${currency.name} (${currency.code})`}
       style={{
         width: size,
         height: size,
@@ -27,7 +29,7 @@ export function FlagAvatar({ currency, size = 36, showFlag = true }: FlagAvatarP
         lineHeight: 1,
       }}
     >
-      <span style={{ filter: 'saturate(1.05)' }}>{currency.flag}</span>
+      <span aria-hidden="true" style={{ filter: 'saturate(1.05)' }}>{currency.flag}</span>
     </div>
   )
 }

@@ -101,7 +101,7 @@ export function Header() {
         </div>
       </div>
 
-      <div
+      <h1
         style={{
           fontSize: 34,
           fontWeight: 800,
@@ -111,7 +111,7 @@ export function Header() {
         }}
       >
         Convert
-      </div>
+      </h1>
       <div style={{ fontSize: 14, color: 'var(--cc-text-muted)', marginTop: 4 }}>
         {rows.length} {rows.length === 1 ? 'currency' : 'currencies'} · tap any to edit
       </div>
