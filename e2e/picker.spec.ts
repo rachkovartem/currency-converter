@@ -5,10 +5,12 @@ const MOCK_RATES_RESPONSE = {
     USD: 1, EUR: 0.9187, GBP: 0.7891, JPY: 144.23,
     CHF: 0.8921, CAD: 1.3654, AUD: 1.5123, CNY: 7.2401,
   },
-  date: '2026-05-03',
+  updatedAt: 1746316800000,
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.route('**/sw.js', route => route.abort())
+
   // ⚠️ Mock the rates API — never hit real ExchangeRate-API in tests
   await page.route('**/api/rates**', async route => {
     await route.fulfill({

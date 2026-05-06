@@ -63,6 +63,17 @@ test.describe('SW Update Banner', () => {
     await page.goto('/')
     await page.waitForSelector('[data-testid="currency-input-USD"]')
 
+    // Wait until the hook has registered its controllerchange listener
+    await expect(async () => {
+      const hasListeners = await page.evaluate(() => {
+        const sw = (window as unknown as Record<string, unknown>)['__testSW'] as {
+          _listeners?: Record<string, unknown[]>
+        }
+        return (sw?._listeners?.['controllerchange']?.length ?? 0) > 0
+      })
+      expect(hasListeners).toBe(true)
+    }).toPass({ timeout: 3000 })
+
     // Fire controllerchange to simulate a SW update being detected
     await page.evaluate(() => {
       const sw = (window as unknown as Record<string, unknown>)['__testSW'] as {
