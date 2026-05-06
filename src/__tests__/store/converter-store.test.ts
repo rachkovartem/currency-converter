@@ -157,6 +157,16 @@ describe('createConverterStore() factory', () => {
     expect(store.getState().activeValue).toBe('999')
     expect(store.getState().rows).toEqual(['USD', 'EUR', 'GBP', 'JPY'])
   })
+
+  it('accepts rates and updatedAt in initialState — no MOCK_RATES flicker window', () => {
+    const realRates = { USD: 1, EUR: 0.91, GBP: 0.77, JPY: 155.0 }
+    const ts = 1700000000000
+    const store = createConverterStore({ rates: realRates, updatedAt: ts })
+    const state = store.getState()
+    // Rates must be the passed-in real rates from the very first tick, not MOCK_RATES
+    expect(state.rates).toEqual(realRates)
+    expect(state.updatedAt).toBe(ts)
+  })
 })
 
 describe('ConverterStoreContext', () => {

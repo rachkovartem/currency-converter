@@ -31,23 +31,12 @@ interface ConverterAppProps {
 }
 
 interface ConverterAppInnerProps {
-  initialRates: Record<string, number>
-  ratesUpdatedAt: number
   store: ConverterStore
 }
 
 // Inner component: all hooks run inside the Provider, so useConverterStore
 // correctly reads from the per-request store via ConverterStoreContext.
-function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterAppInnerProps) {
-  // Capture initial SSR rates in a ref so we can use it in the effect
-  // without triggering re-runs on re-renders (rates are daily, SSR-only)
-  const initialRatesRef = useRef(initialRates)
-
-  // Initialize store with SSR rates on first mount, using the real API timestamp
-  useEffect(() => {
-    store.setState({ rates: initialRatesRef.current, updatedAt: ratesUpdatedAt })
-  }, [store, ratesUpdatedAt])
-
+function ConverterAppInner({ store }: ConverterAppInnerProps) {
   const rows = useConverterStore(s => s.rows)
   const activeCode = useConverterStore(s => s.activeCode)
   const activeValue = useConverterStore(s => s.activeValue)
@@ -310,19 +299,13 @@ function ConverterAppInner({ initialRates, ratesUpdatedAt, store }: ConverterApp
 export function ConverterApp({ initialRates, ratesUpdatedAt, initialState }: ConverterAppProps) {
   // Create a per-request store seeded with the server-provided cookie state.
   // useState lazy initialiser runs once and is safe to read during render.
-  const [store] = useState<ConverterStore>(() => {
-    const s = createConverterStore(initialState ?? undefined)
-    s.setState({ rates: initialRates, updatedAt: ratesUpdatedAt })
-    return s
-  })
+  const [store] = useState<ConverterStore>(() =>
+    createConverterStore({ ...(initialState ?? {}), rates: initialRates, updatedAt: ratesUpdatedAt })
+  )
 
   return (
     <ConverterStoreContext.Provider value={store}>
-      <ConverterAppInner
-        initialRates={initialRates}
-        ratesUpdatedAt={ratesUpdatedAt}
-        store={store}
-      />
+      <ConverterAppInner store={store} />
     </ConverterStoreContext.Provider>
   )
 }

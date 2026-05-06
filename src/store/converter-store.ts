@@ -7,7 +7,7 @@ import { CurrencyCode, RecentConversion } from '@/lib/types'
 import { cookieStorage, PersistedConverterState } from '@/lib/cookie-storage'
 import { saveRecentCurrencies } from '@/lib/local-storage'
 
-interface ConverterState {
+export interface ConverterState {
   // Data
   rows: CurrencyCode[]
   activeCode: CurrencyCode
@@ -49,7 +49,7 @@ interface ConverterState {
   setFocusMode: (enabled: boolean) => void
 }
 
-export function createConverterStore(initialState?: Partial<PersistedConverterState>) {
+export function createConverterStore(initialState?: Partial<ConverterState>) {
   return createStore<ConverterState>()(
     persist(
       (set) => ({
