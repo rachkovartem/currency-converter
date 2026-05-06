@@ -11,8 +11,6 @@ services:
     environment:
       NODE_ENV: production
       EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
-    volumes:
-      - next-cache:/app/.next/cache
     networks:
       - web
     healthcheck:
@@ -21,10 +19,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-volumes:
-  next-cache:
-    driver: local
 
 networks:
   web:
