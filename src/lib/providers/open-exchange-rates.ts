@@ -1,4 +1,4 @@
-import { MOCK_RATES } from '@/lib/rates'
+import { MOCK_RATES_OER } from '@/lib/rates'
 import type { RatesResult } from '@/lib/rates'
 import type { RateProvider } from './types'
 
@@ -15,7 +15,7 @@ export class OpenExchangeRatesProvider implements RateProvider {
 
     if (!appId) {
       console.warn('OPEN_EXCHANGE_RATES_APP_ID not set, using mock rates')
-      return { rates: MOCK_RATES, updatedAt: Date.now() }
+      return { rates: MOCK_RATES_OER, updatedAt: Date.now() }
     }
 
     try {
@@ -40,7 +40,7 @@ export class OpenExchangeRatesProvider implements RateProvider {
       }
     } catch (error) {
       console.error('Failed to fetch rates from Open Exchange Rates:', error)
-      return { rates: MOCK_RATES, updatedAt: Date.now() }
+      return { rates: MOCK_RATES_OER, updatedAt: Date.now() }
     }
   }
 }

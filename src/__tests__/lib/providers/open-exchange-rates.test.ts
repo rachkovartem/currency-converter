@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { MOCK_RATES } from '@/lib/rates'
+import { MOCK_RATES_OER } from '@/lib/rates'
 
 describe('OpenExchangeRatesProvider', () => {
   const MOCK_OER_RESPONSE = {
@@ -42,7 +42,7 @@ describe('OpenExchangeRatesProvider', () => {
     const { OpenExchangeRatesProvider } = await import('@/lib/providers/open-exchange-rates')
     const provider = new OpenExchangeRatesProvider()
     const result = await provider.fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES)
+    expect(result.rates).toEqual(MOCK_RATES_OER)
     expect(vi.mocked(fetch)).not.toHaveBeenCalled()
   })
 
@@ -52,7 +52,7 @@ describe('OpenExchangeRatesProvider', () => {
     const { OpenExchangeRatesProvider } = await import('@/lib/providers/open-exchange-rates')
     const provider = new OpenExchangeRatesProvider()
     const result = await provider.fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES)
+    expect(result.rates).toEqual(MOCK_RATES_OER)
   })
 
   it('converts unix timestamp (seconds) to ms correctly', async () => {

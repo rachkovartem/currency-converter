@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { convert, formatNumber, MOCK_RATES } from '@/lib/rates'
+import { convert, formatNumber, MOCK_RATES, MOCK_RATES_OER, OER_FIXTURE_TIMESTAMP } from '@/lib/rates'
 
 describe('convert()', () => {
   it('USD to EUR converts correctly', () => {
@@ -29,6 +29,45 @@ describe('convert()', () => {
   it('uses custom rates when provided', () => {
     const customRates = { USD: 1, EUR: 0.5 }
     expect(convert(100, 'USD', 'EUR', customRates)).toBeCloseTo(50, 4)
+  })
+})
+
+describe('MOCK_RATES_OER', () => {
+  it('has 172 currencies', () => {
+    expect(Object.keys(MOCK_RATES_OER).length).toBe(172)
+  })
+
+  it('has USD: 1 as base', () => {
+    expect(MOCK_RATES_OER['USD']).toBe(1)
+  })
+
+  it('contains known currencies EUR, GBP, JPY', () => {
+    expect(typeof MOCK_RATES_OER['EUR']).toBe('number')
+    expect(typeof MOCK_RATES_OER['GBP']).toBe('number')
+    expect(typeof MOCK_RATES_OER['JPY']).toBe('number')
+    expect(MOCK_RATES_OER['EUR']).toBeGreaterThan(0)
+    expect(MOCK_RATES_OER['GBP']).toBeGreaterThan(0)
+    expect(MOCK_RATES_OER['JPY']).toBeGreaterThan(0)
+  })
+})
+
+describe('OER_FIXTURE_TIMESTAMP', () => {
+  it('equals 1778072400 * 1000', () => {
+    expect(OER_FIXTURE_TIMESTAMP).toBe(1778072400 * 1000)
+  })
+})
+
+describe('MOCK_RATES (legacy)', () => {
+  it('still exports and has at least USD', () => {
+    expect(MOCK_RATES).toBeDefined()
+    expect(typeof MOCK_RATES['USD']).toBe('number')
+    expect(MOCK_RATES['USD']).toBe(1)
+  })
+
+  it('has expected shape with multiple currencies', () => {
+    expect(Object.keys(MOCK_RATES).length).toBeGreaterThan(0)
+    expect(typeof MOCK_RATES['EUR']).toBe('number')
+    expect(typeof MOCK_RATES['GBP']).toBe('number')
   })
 })
 

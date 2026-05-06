@@ -1,4 +1,4 @@
-import { MOCK_RATES } from './rates'
+import { MOCK_RATES_OER, OER_FIXTURE_TIMESTAMP } from './rates'
 import { getProvider } from './providers'
 
 // Re-export RatesResult for backward compatibility — defined in rates.ts
@@ -7,7 +7,7 @@ export type { RatesResult } from './rates'
 export async function fetchRates() {
   // Never hit the real API in development — preserve free-tier limits
   if (process.env.NODE_ENV === 'development') {
-    return { rates: MOCK_RATES, updatedAt: Date.now() }
+    return { rates: MOCK_RATES_OER, updatedAt: OER_FIXTURE_TIMESTAMP }
   }
   return getProvider().fetchRates()
 }
