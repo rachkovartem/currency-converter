@@ -6,7 +6,7 @@ export type { RatesResult } from './rates'
 
 export async function fetchRates() {
   // Never hit the real API in development — preserve free-tier limits
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development' || process.env.NEXT_PHASE === 'phase-production-build') {
     return { rates: MOCK_RATES_OER, updatedAt: OER_FIXTURE_TIMESTAMP }
   }
   return getProvider().fetchRates()
