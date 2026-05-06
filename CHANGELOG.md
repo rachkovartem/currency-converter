@@ -5,6 +5,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) · Versioning: 
 
 ---
 
+## [1.5.0] — 2026-05-06
+
+### Added
+- **PWA install banner** — full-width accent-coloured install strip appears below the header when the browser fires `beforeinstallprompt`; dismissable via ×; powered by `usePWAInstall` hook with double-click guard and `appinstalled` cleanup
+- **Multi-provider exchange rate architecture** — provider pattern (`RateProvider` interface + factory) allows switching between ExchangeRate-API and Open Exchange Rates via `RATE_PROVIDER` env var
+- **Open Exchange Rates integration** — new provider with hourly updates (`revalidate: 3600`); production configured to use OER; real API response saved as local dev fixture (`src/lib/fixtures/oer-latest.json`, 172 currencies)
+
+### Fixed
+- **First-render rate flicker** — store now initialised with real SSR rates at creation time; eliminated `MOCK_RATES` flash and redundant post-paint `useEffect`
+- **Missing API key in production** — providers now throw a descriptive error instead of silently returning mock data when key/app_id is not configured
+- **Rate source label** — replaced hardcoded "ECB ·" with neutral "Rates ·" in the header (app no longer exclusively uses ECB data)
+
+---
+
 ## [1.4.0] — 2026-05-04
 
 ### Added
