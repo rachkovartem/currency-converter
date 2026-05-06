@@ -77,6 +77,8 @@ jobs:
             git checkout ${{ github.ref_name }} &&
             cat > .env <<'ENVEOF'
           EXCHANGE_RATE_API_KEY=${{ secrets.EXCHANGE_RATE_API_KEY }}
+          RATE_PROVIDER=open-exchange-rates
+          OPEN_EXCHANGE_RATES_APP_ID=${{ secrets.OPEN_EXCHANGE_RATES_APP_ID }}
           ENVEOF
             docker compose -f docker-compose.prod.yml build &&
             docker compose -f docker-compose.prod.yml up -d --force-recreate &&

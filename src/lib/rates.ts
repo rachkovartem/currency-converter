@@ -1,3 +1,8 @@
+export interface RatesResult {
+  rates: Record<string, number>
+  updatedAt: number // unix ms timestamp
+}
+
 // Rates per 1 USD (mock; close to real-ish values, not used for advice)
 export const MOCK_RATES: Record<string, number> = {
   USD: 1, EUR: 0.92, GBP: 0.79, JPY: 156.4, CHF: 0.89,
