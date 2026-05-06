@@ -5,10 +5,12 @@ const MOCK_RATES_RESPONSE = {
     USD: 1, EUR: 0.9187, GBP: 0.7891, JPY: 144.23,
     CHF: 0.8921, CAD: 1.3654, AUD: 1.5123, CNY: 7.2401,
   },
-  date: '2026-05-03',
+  updatedAt: 1746316800000,
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.route('**/sw.js', route => route.abort())
+
   // ⚠️ Mock the rates API — never hit real ExchangeRate-API in tests
   await page.route('**/api/rates**', async route => {
     await route.fulfill({
@@ -29,6 +31,68 @@ test.beforeEach(async ({ page }) => {
         conversion_rates: MOCK_RATES_RESPONSE.rates,
       }),
     })
+  })
+})
+
+test.describe('SW Update Banner', () => {
+  test('AC-SW-3/4: update banner appears and reload works when SW update is detected', async ({ page }) => {
+    // Inject a fake serviceWorker BEFORE the page loads so the hook captures it
+    await page.addInitScript(() => {
+      const listeners: Record<string, EventListener[]> = {}
+      const fakeSW = {
+        controller: { postMessage: () => {} } as unknown as ServiceWorker, // truthy — simulates "had controller"
+        addEventListener(event: string, handler: EventListener) {
+          if (!listeners[event]) listeners[event] = []
+          listeners[event].push(handler)
+        },
+        removeEventListener(event: string, handler: EventListener) {
+          if (listeners[event]) {
+            listeners[event] = listeners[event].filter(h => h !== handler)
+          }
+        },
+        register: () => Promise.resolve(undefined as unknown as ServiceWorkerRegistration),
+        _listeners: listeners,
+      }
+      ;(window as unknown as Record<string, unknown>)['__testSW'] = fakeSW
+      Object.defineProperty(navigator, 'serviceWorker', {
+        get: () => fakeSW,
+        configurable: true,
+      })
+    })
+
+    await page.goto('/')
+    await page.waitForSelector('[data-testid="currency-input-USD"]')
+
+    // Fire controllerchange to simulate a SW update being detected
+    await page.evaluate(() => {
+      const sw = (window as unknown as Record<string, unknown>)['__testSW'] as {
+        _listeners: Record<string, EventListener[]>
+      }
+      const handlers = (sw._listeners ?? {})['controllerchange'] ?? []
+      handlers.forEach((h: EventListener) => h(new Event('controllerchange')))
+    })
+
+    // AC-SW-3: banner must appear with correct text
+    const banner = page.getByTestId('update-banner')
+    await expect(banner).toBeVisible({ timeout: 3000 })
+    await expect(banner).toContainText('New version available')
+
+    // AC-SW-4: clicking Reload triggers window.location.reload
+    // Spy on reload before clicking — prevents actual page reload during tests
+    await page.evaluate(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(window as any).__reloadCalled = false
+      Object.defineProperty(window.location, 'reload', {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        value: () => { (window as any).__reloadCalled = true },
+        configurable: true,
+        writable: true,
+      })
+    })
+    await page.getByTestId('reload-btn').click()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const reloadCalled = await page.evaluate(() => !!(window as any).__reloadCalled)
+    expect(reloadCalled).toBe(true)
   })
 })
 

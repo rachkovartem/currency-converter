@@ -10,7 +10,9 @@ import { CURRENCY_BY_CODE } from '@/lib/currencies'
 import { timeAgo } from '@/lib/time'
 import { useReorder } from '@/hooks/use-reorder'
 import { useRatesRefresh } from '@/hooks/use-rates-refresh'
+import { useSwUpdate } from '@/hooks/use-sw-update'
 import { Header } from '@/components/header'
+import { UpdateBanner } from '@/components/update-banner'
 import { CurrencyListRow } from '@/components/currency-list-row'
 import { CurrencyGridTile } from '@/components/currency-grid-tile'
 import { AddCurrencyButton } from '@/components/add-currency-button'
@@ -91,6 +93,7 @@ function ConverterAppInner({ store }: ConverterAppInnerProps) {
   }, [store])
 
   const { isRefreshing, refresh } = useRatesRefresh()
+  const { updateAvailable, applyUpdate } = useSwUpdate()
 
   const reorder = useReorder(rows, reorderRows)
 
@@ -181,6 +184,12 @@ function ConverterAppInner({ store }: ConverterAppInnerProps) {
           >
             <Settings size={17} />
           </button>
+        </div>
+      )}
+
+      {updateAvailable && (
+        <div style={{ padding: '0 12px' }}>
+          <UpdateBanner onReload={applyUpdate} />
         </div>
       )}
 
