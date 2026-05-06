@@ -107,15 +107,15 @@ test.describe('Converter — Main Features', () => {
     expect(bg).toContain('gradient')
   })
 
-  test('AC-14: "Live" text is present and ECB rate date is shown', async ({ page }) => {
+  test('AC-14: "Live" text is present and rate date is shown', async ({ page }) => {
     const liveStatus = page.getByTestId('live-status')
     await expect(liveStatus).toContainText('Live')
 
     const updatedEl = page.getByTestId('last-updated')
     await expect(updatedEl).toBeVisible()
 
-    // Rates now come from ECB via Frankfurter API — the date label shows "ECB · <date>"
+    // Label shows "Rates · <date>"
     const text = await updatedEl.textContent()
-    expect(text).toMatch(/ECB/)
+    expect(text).toMatch(/Rates ·/)
   })
 })
