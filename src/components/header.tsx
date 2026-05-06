@@ -1,11 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, History, Settings, X } from 'lucide-react'
+import { Download, History, RefreshCw, Settings, X } from 'lucide-react'
 import { useConverterStore } from '@/store/converter-store'
 import { usePWAInstall } from '@/hooks/use-pwa-install'
 
-export function Header() {
+interface HeaderProps {
+  isRefreshing: boolean
+  onRefresh: () => void
+}
+
+export function Header({ isRefreshing, onRefresh }: HeaderProps) {
   const rows = useConverterStore(s => s.rows)
   const online = useConverterStore(s => s.online)
   const updatedAt = useConverterStore(s => s.updatedAt)
@@ -61,6 +66,25 @@ export function Header() {
               Rates · {formattedDate}
             </span>
           )}
+          <button
+            data-testid="refresh-rates-btn"
+            onClick={onRefresh}
+            aria-label="Refresh rates"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'inherit',
+              padding: '0 0 0 4px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <RefreshCw
+              size={17}
+              style={isRefreshing ? { animation: 'spin 1s linear infinite' } : undefined}
+            />
+          </button>
         </div>
 
         {/* Header action buttons */}

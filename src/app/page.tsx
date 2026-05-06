@@ -3,7 +3,7 @@ import { ConverterApp } from '@/components/converter-app'
 import { fetchRates } from '@/lib/exchange-rate-api'
 import { getServerConverterCookieState } from '@/lib/cookie-storage'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 export const metadata = {
   title: 'Convert — Currency Converter | Live Exchange Rates',

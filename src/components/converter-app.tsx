@@ -9,6 +9,7 @@ import { convert } from '@/lib/rates'
 import { CURRENCY_BY_CODE } from '@/lib/currencies'
 import { timeAgo } from '@/lib/time'
 import { useReorder } from '@/hooks/use-reorder'
+import { useRatesRefresh } from '@/hooks/use-rates-refresh'
 import { Header } from '@/components/header'
 import { CurrencyListRow } from '@/components/currency-list-row'
 import { CurrencyGridTile } from '@/components/currency-grid-tile'
@@ -89,6 +90,8 @@ function ConverterAppInner({ store }: ConverterAppInnerProps) {
     }
   }, [store])
 
+  const { isRefreshing, refresh } = useRatesRefresh()
+
   const reorder = useReorder(rows, reorderRows)
 
   // Local DOM refs for the list container and each row wrapper.
@@ -142,7 +145,7 @@ function ConverterAppInner({ store }: ConverterAppInnerProps) {
         paddingTop: 'env(safe-area-inset-top)',
       }}
     >
-      {!focusMode && <Header />}
+      {!focusMode && <Header isRefreshing={isRefreshing} onRefresh={refresh} />}
 
       {focusMode && (
         <div

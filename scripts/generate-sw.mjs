@@ -49,14 +49,14 @@ const { count, size } = await generateSW({
         cacheableResponse: { statuses: [0, 200] },
       },
     },
-    // External exchange-rate API (called server-side, but cache defensively)
+    // /api/rates — NetworkFirst with offline fallback to cache
     {
-      urlPattern: /exchangerate-api\.com\/.+/,
+      urlPattern: /\/api\/rates/,
       handler: 'NetworkFirst',
       options: {
-        cacheName: 'exchange-rates-v1',
+        cacheName: 'api-rates-v1',
         networkTimeoutSeconds: 5,
-        expiration: { maxEntries: 5, maxAgeSeconds: 60 * 60 },
+        expiration: { maxEntries: 1, maxAgeSeconds: 60 * 60 },
         cacheableResponse: { statuses: [0, 200] },
       },
     },
