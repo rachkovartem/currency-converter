@@ -1,7 +1,9 @@
 'use client'
 
-import { History, Settings } from 'lucide-react'
+import { useState } from 'react'
+import { Download, History, Settings, X } from 'lucide-react'
 import { useConverterStore } from '@/store/converter-store'
+import { usePWAInstall } from '@/hooks/use-pwa-install'
 
 export function Header() {
   const rows = useConverterStore(s => s.rows)
@@ -9,6 +11,8 @@ export function Header() {
   const updatedAt = useConverterStore(s => s.updatedAt)
   const openRecents = useConverterStore(s => s.openRecents)
   const openSettings = useConverterStore(s => s.openSettings)
+  const { isInstallable, install } = usePWAInstall()
+  const [dismissed, setDismissed] = useState(false)
 
   const formattedDate = updatedAt
     ? new Date(updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -115,6 +119,43 @@ export function Header() {
       <div style={{ fontSize: 14, color: 'var(--cc-text-muted)', marginTop: 4 }}>
         {rows.length} {rows.length === 1 ? 'currency' : 'currencies'} · tap any to edit
       </div>
+
+      {isInstallable && !dismissed && (
+        <div
+          data-testid="install-banner"
+          onClick={install}
+          style={{
+            marginTop: 10,
+            borderRadius: 12,
+            background: 'var(--cc-accent-soft)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 12px',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Download size={15} color="var(--cc-accent)" />
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--cc-accent)' }}>Install app</span>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); setDismissed(true) }}
+            aria-label="Dismiss install banner"
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--cc-accent)',
+              display: 'flex',
+              alignItems: 'center',
+              padding: 4,
+            }}
+          >
+            <X size={15} />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

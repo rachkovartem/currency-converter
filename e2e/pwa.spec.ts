@@ -77,4 +77,11 @@ test.describe('PWA & SEO', () => {
     // Should render without crashing
     expect(await page.title()).toBeTruthy()
   })
+
+  test('AC-7: install button hidden when beforeinstallprompt not fired', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+    const installBtn = page.getByTestId('install-banner')
+    await expect(installBtn).not.toBeAttached()
+  })
 })
