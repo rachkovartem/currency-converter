@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fetchRates } from '@/lib/exchange-rate-api'
+import { MOCK_RATES_OER, OER_FIXTURE_TIMESTAMP } from '@/lib/rates'
 
 // ⚠️ CRITICAL: ALL fetch calls are mocked — no real network requests
 describe('fetchRates', () => {
@@ -72,5 +73,21 @@ describe('fetchRates', () => {
       json: async () => ({ result: 'error', 'error-type': 'invalid-key' }),
     }))
     await expect(fetchRates()).rejects.toThrow()
+  })
+
+  it('returns mock rates when NODE_ENV is development', async () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    const result = await fetchRates()
+    expect(result.rates).toBe(MOCK_RATES_OER)
+    expect(result.updatedAt).toBe(OER_FIXTURE_TIMESTAMP)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('returns mock rates when NEXT_PHASE is phase-production-build', async () => {
+    vi.stubEnv('NEXT_PHASE', 'phase-production-build')
+    const result = await fetchRates()
+    expect(result.rates).toBe(MOCK_RATES_OER)
+    expect(result.updatedAt).toBe(OER_FIXTURE_TIMESTAMP)
+    expect(fetch).not.toHaveBeenCalled()
   })
 })
