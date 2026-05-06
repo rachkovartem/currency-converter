@@ -39,14 +39,14 @@ describe('Header — last-updated span', () => {
     expect(screen.queryByTestId('last-updated')).toBeNull()
   })
 
-  it('shows "ECB · <formatted date>" when updatedAt is a valid timestamp', () => {
+  it('shows "Rates · <formatted date>" when updatedAt is a valid timestamp', () => {
     // May 3, 2026 00:00:00 UTC in ms
     const ts = new Date('2026-05-03T00:00:00Z').getTime()
     useConverterStore.setState({ ...baseState, updatedAt: ts })
     render(<Header />)
     const span = screen.getByTestId('last-updated')
     expect(span).toBeTruthy()
-    expect(span.textContent).toMatch(/^ECB · /)
+    expect(span.textContent).toMatch(/^Rates · /)
     expect(span.textContent).toContain('2026')
   })
 })

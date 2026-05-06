@@ -58,7 +58,7 @@ export function Header() {
               data-testid="last-updated"
               style={{ color: 'var(--cc-text-muted)', fontWeight: 500, marginLeft: 2 }}
             >
-              ECB · {formattedDate}
+              Rates · {formattedDate}
             </span>
           )}
         </div>
