@@ -3,14 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
     image: currency-converter:latest
     container_name: currency-converter
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
+      RATE_PROVIDER: ${RATE_PROVIDER}
+      OPEN_EXCHANGE_RATES_APP_ID: ${OPEN_EXCHANGE_RATES_APP_ID}
     networks:
       - web
     healthcheck:

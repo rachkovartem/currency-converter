@@ -50,8 +50,9 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Build app
         run: npm run build
-        # No EXCHANGE_RATE_API_KEY — app uses MOCK_RATES fallback in build
-        # E2E tests mock /api/rates via page.route()
+        env:
+          RATE_PROVIDER: open-exchange-rates
+          OPEN_EXCHANGE_RATES_APP_ID: ${{ secrets.OPEN_EXCHANGE_RATES_APP_ID }}
       - name: Playwright E2E tests
         run: npx playwright test
         # No real API key — all network calls mocked via page.route()
