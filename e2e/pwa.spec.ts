@@ -89,21 +89,11 @@ test.describe('SW Update Banner', () => {
     await expect(banner).toContainText('New version available')
 
     // AC-SW-4: clicking Reload triggers window.location.reload
-    // Spy on reload before clicking — prevents actual page reload during tests
-    await page.evaluate(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(window as any).__reloadCalled = false
-      Object.defineProperty(window.location, 'reload', {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        value: () => { (window as any).__reloadCalled = true },
-        configurable: true,
-        writable: true,
-      })
-    })
+    // Detect via navigation — window.location.reload() causes a page navigation event.
+    // waitForNavigation() throws if no navigation occurs within 5s — correct failure mode.
+    const navigationPromise = page.waitForNavigation({ timeout: 5000 })
     await page.getByTestId('reload-btn').click()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const reloadCalled = await page.evaluate(() => !!(window as any).__reloadCalled)
-    expect(reloadCalled).toBe(true)
+    await navigationPromise
   })
 })
 
