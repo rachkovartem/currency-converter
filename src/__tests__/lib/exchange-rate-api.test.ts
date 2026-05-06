@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fetchRates } from '@/lib/exchange-rate-api'
-import { MOCK_RATES } from '@/lib/rates'
 
 // ⚠️ CRITICAL: ALL fetch calls are mocked — no real network requests
 describe('fetchRates', () => {
@@ -52,30 +51,26 @@ describe('fetchRates', () => {
     expect(result.updatedAt).toBe(new Date('Sat, 03 May 2026 00:02:31 +0000').getTime())
   })
 
-  it('returns MOCK_RATES as fallback when API key is not set', async () => {
+  it('throws when API key is not set', async () => {
     vi.stubEnv('EXCHANGE_RATE_API_KEY', '')
-    const result = await fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES)
+    await expect(fetchRates()).rejects.toThrow()
   })
 
-  it('returns MOCK_RATES as fallback when fetch fails', async () => {
+  it('throws when fetch fails', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
-    const result = await fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES)
+    await expect(fetchRates()).rejects.toThrow()
   })
 
-  it('returns MOCK_RATES as fallback when response is not ok', async () => {
+  it('throws when response is not ok', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500 }))
-    const result = await fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES)
+    await expect(fetchRates()).rejects.toThrow()
   })
 
-  it('returns MOCK_RATES when API returns error result', async () => {
+  it('throws when API returns error result', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ result: 'error', 'error-type': 'invalid-key' }),
     }))
-    const result = await fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES)
+    await expect(fetchRates()).rejects.toThrow()
   })
 })

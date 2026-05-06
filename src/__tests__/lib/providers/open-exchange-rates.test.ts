@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { MOCK_RATES_OER } from '@/lib/rates'
 
 describe('OpenExchangeRatesProvider', () => {
   const MOCK_OER_RESPONSE = {
@@ -37,22 +36,20 @@ describe('OpenExchangeRatesProvider', () => {
     )
   })
 
-  it('returns MOCK_RATES when app_id is missing', async () => {
+  it('throws when OPEN_EXCHANGE_RATES_APP_ID is not set', async () => {
     vi.stubEnv('OPEN_EXCHANGE_RATES_APP_ID', '')
     const { OpenExchangeRatesProvider } = await import('@/lib/providers/open-exchange-rates')
     const provider = new OpenExchangeRatesProvider()
-    const result = await provider.fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES_OER)
+    await expect(provider.fetchRates()).rejects.toThrow('OPEN_EXCHANGE_RATES_APP_ID is not configured')
     expect(vi.mocked(fetch)).not.toHaveBeenCalled()
   })
 
-  it('returns MOCK_RATES when fetch fails', async () => {
+  it('throws when fetch fails', async () => {
     vi.stubEnv('OPEN_EXCHANGE_RATES_APP_ID', 'valid-app-id')
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
     const { OpenExchangeRatesProvider } = await import('@/lib/providers/open-exchange-rates')
     const provider = new OpenExchangeRatesProvider()
-    const result = await provider.fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES_OER)
+    await expect(provider.fetchRates()).rejects.toThrow()
   })
 
   it('converts unix timestamp (seconds) to ms correctly', async () => {

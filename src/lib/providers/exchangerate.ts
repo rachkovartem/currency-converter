@@ -1,4 +1,3 @@
-import { MOCK_RATES } from '@/lib/rates'
 import type { RatesResult } from '@/lib/rates'
 import type { RateProvider } from './types'
 
@@ -16,37 +15,31 @@ export class ExchangeRateProvider implements RateProvider {
     const apiKey = process.env.EXCHANGE_RATE_API_KEY
 
     if (!apiKey) {
-      console.warn('EXCHANGE_RATE_API_KEY not set, using mock rates')
-      return { rates: MOCK_RATES, updatedAt: Date.now() }
+      throw new Error('EXCHANGE_RATE_API_KEY is not configured')
     }
 
-    try {
-      const res = await fetch(
-        `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`,
-        {
-          next: { revalidate: 10800 }, // 3h Next.js ISR cache — shared across all users
-        }
-      )
-
-      if (!res.ok) {
-        throw new Error(`ExchangeRate-API error: ${res.status}`)
+    const res = await fetch(
+      `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`,
+      {
+        next: { revalidate: 10800 }, // 3h Next.js ISR cache — shared across all users
       }
+    )
 
-      const data: ExchangeRateApiResponse = await res.json()
+    if (!res.ok) {
+      throw new Error(`ExchangeRate-API error: ${res.status}`)
+    }
 
-      if (data.result !== 'success') {
-        throw new Error(`ExchangeRate-API returned error result`)
-      }
+    const data: ExchangeRateApiResponse = await res.json()
 
-      const updatedAt = new Date(data.time_last_update_utc).getTime()
+    if (data.result !== 'success') {
+      throw new Error(`ExchangeRate-API returned error result`)
+    }
 
-      return {
-        rates: data.conversion_rates,
-        updatedAt,
-      }
-    } catch (error) {
-      console.error('Failed to fetch rates from ExchangeRate-API:', error)
-      return { rates: MOCK_RATES, updatedAt: Date.now() }
+    const updatedAt = new Date(data.time_last_update_utc).getTime()
+
+    return {
+      rates: data.conversion_rates,
+      updatedAt,
     }
   }
 }

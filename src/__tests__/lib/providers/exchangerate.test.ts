@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { MOCK_RATES } from '@/lib/rates'
 
 describe('ExchangeRateProvider', () => {
   const MOCK_API_RESPONSE = {
@@ -39,22 +38,20 @@ describe('ExchangeRateProvider', () => {
     )
   })
 
-  it('returns MOCK_RATES when key is missing', async () => {
+  it('throws when EXCHANGE_RATE_API_KEY is not set', async () => {
     vi.stubEnv('EXCHANGE_RATE_API_KEY', '')
     const { ExchangeRateProvider } = await import('@/lib/providers/exchangerate')
     const provider = new ExchangeRateProvider()
-    const result = await provider.fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES)
+    await expect(provider.fetchRates()).rejects.toThrow('EXCHANGE_RATE_API_KEY is not configured')
     expect(vi.mocked(fetch)).not.toHaveBeenCalled()
   })
 
-  it('returns MOCK_RATES when fetch fails', async () => {
+  it('throws when fetch fails', async () => {
     vi.stubEnv('EXCHANGE_RATE_API_KEY', 'valid-key')
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
     const { ExchangeRateProvider } = await import('@/lib/providers/exchangerate')
     const provider = new ExchangeRateProvider()
-    const result = await provider.fetchRates()
-    expect(result.rates).toEqual(MOCK_RATES)
+    await expect(provider.fetchRates()).rejects.toThrow()
   })
 
   it('parses timestamp from time_last_update_utc', async () => {

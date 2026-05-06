@@ -1,4 +1,3 @@
-import { MOCK_RATES_OER } from '@/lib/rates'
 import type { RatesResult } from '@/lib/rates'
 import type { RateProvider } from './types'
 
@@ -14,33 +13,27 @@ export class OpenExchangeRatesProvider implements RateProvider {
     const appId = process.env.OPEN_EXCHANGE_RATES_APP_ID
 
     if (!appId) {
-      console.warn('OPEN_EXCHANGE_RATES_APP_ID not set, using mock rates')
-      return { rates: MOCK_RATES_OER, updatedAt: Date.now() }
+      throw new Error('OPEN_EXCHANGE_RATES_APP_ID is not configured')
     }
 
-    try {
-      const res = await fetch(
-        `https://openexchangerates.org/api/latest.json?app_id=${appId}`,
-        {
-          next: { revalidate: 3600 }, // 1h — matches OER update frequency
-        }
-      )
-
-      if (!res.ok) {
-        throw new Error(`Open Exchange Rates error: ${res.status}`)
+    const res = await fetch(
+      `https://openexchangerates.org/api/latest.json?app_id=${appId}`,
+      {
+        next: { revalidate: 3600 }, // 1h — matches OER update frequency
       }
+    )
 
-      const data: OerResponse = await res.json()
+    if (!res.ok) {
+      throw new Error(`Open Exchange Rates error: ${res.status}`)
+    }
 
-      const updatedAt = data.timestamp * 1000 // convert unix seconds to ms
+    const data: OerResponse = await res.json()
 
-      return {
-        rates: data.rates,
-        updatedAt,
-      }
-    } catch (error) {
-      console.error('Failed to fetch rates from Open Exchange Rates:', error)
-      return { rates: MOCK_RATES_OER, updatedAt: Date.now() }
+    const updatedAt = data.timestamp * 1000 // convert unix seconds to ms
+
+    return {
+      rates: data.rates,
+      updatedAt,
     }
   }
 }
