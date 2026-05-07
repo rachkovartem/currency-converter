@@ -93,4 +93,13 @@ describe('PickerSheet', () => {
     render(<PickerSheet />)
     expect(screen.getByText('No currencies available')).toBeTruthy()
   })
+
+  // AC-1 iOS Safari anti-zoom: search input font-size must be ≥ 16px
+  it('AC-1 iOS Safari anti-zoom: search input font-size is ≥ 16px (DOM check)', () => {
+    render(<PickerSheet />)
+    const input = screen.getByTestId('picker-search') as HTMLInputElement
+    // jsdom preserves inline style values set directly in JSX
+    const fs = parseInt(input.style.fontSize, 10)
+    expect(fs).toBeGreaterThanOrEqual(16)
+  })
 })

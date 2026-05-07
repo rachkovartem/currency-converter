@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { render, fireEvent } from '@testing-library/react'
+
+const SRC_PATH = resolve(__dirname, '../../components/currency-list-row.tsx')
+const src = readFileSync(SRC_PATH, 'utf-8')
 import { CurrencyListRow } from '@/components/currency-list-row'
 import { CURRENCY_BY_CODE } from '@/lib/currencies'
 
@@ -287,5 +290,27 @@ describe('CurrencyListRow', () => {
       <CurrencyListRow {...defaultProps} value="3.0636" isActive={false} decimals={2} />
     )
     expect(input.value).toBe('3.06')
+  })
+
+  // AC-1 iOS Safari anti-zoom: all font-size floors must be ≥ 16px
+  // jsdom cannot compute clamp() values, so we verify the source text directly.
+  describe('AC-1 iOS Safari anti-zoom: input font-size floors ≥ 16px', () => {
+    it('inputFs for compact density has floor ≥ 16px', () => {
+      // Must be clamp(16px, ...) not clamp(14px, ...)
+      expect(src).not.toContain("clamp(14px, 4vw, 18px)")
+      expect(src).toMatch(/clamp\(16px,\s*4vw,\s*18px\)/)
+    })
+
+    it('valueFontSize for len > 16 has floor ≥ 16px', () => {
+      // Must be clamp(16px, ...) not clamp(13px, ...)
+      expect(src).not.toContain("clamp(13px, 3.8vw, 17px)")
+      expect(src).toMatch(/clamp\(16px,\s*3\.8vw,\s*17px\)/)
+    })
+
+    it('valueFontSize for len > 13 has floor ≥ 16px', () => {
+      // Must be clamp(16px, ...) not clamp(15px, ...)
+      expect(src).not.toContain("clamp(15px, 4.5vw, 20px)")
+      expect(src).toMatch(/clamp\(16px,\s*4\.5vw,\s*20px\)/)
+    })
   })
 })

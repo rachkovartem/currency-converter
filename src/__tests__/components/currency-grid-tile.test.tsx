@@ -107,3 +107,23 @@ describe('CurrencyGridTile', () => {
     expect(tile?.style.minHeight).toBe('130px')
   })
 })
+
+describe('AC-1 iOS Safari anti-zoom: grid tile input font-size is ≥ 16px (DOM check)', () => {
+  it('compact density: input font-size is ≥ 16px', () => {
+    const { getByTestId } = render(
+      <CurrencyGridTile {...defaultProps} density="compact" />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    const fs = parseInt(input.style.fontSize, 10)
+    expect(fs).toBeGreaterThanOrEqual(16)
+  })
+
+  it('comfortable density: input font-size is ≥ 16px', () => {
+    const { getByTestId } = render(
+      <CurrencyGridTile {...defaultProps} density="comfortable" />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    const fs = parseInt(input.style.fontSize, 10)
+    expect(fs).toBeGreaterThanOrEqual(16)
+  })
+})

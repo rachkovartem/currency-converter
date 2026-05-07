@@ -119,7 +119,7 @@ export function PickerSheet() {
                 outline: 'none',
                 background: 'transparent',
                 fontFamily: 'inherit',
-                fontSize: 15,
+                fontSize: 16,
                 color: 'var(--cc-text)',
                 flex: 1,
                 padding: 0,

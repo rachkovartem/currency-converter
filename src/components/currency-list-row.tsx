@@ -43,7 +43,7 @@ export function CurrencyListRow({
 
   const { dx, setDx, handlers } = useSwipeToDelete(onDelete)
   const padY = density === 'compact' ? 5 : 10
-  const inputFs = density === 'compact' ? 'clamp(14px, 4vw, 18px)' : 'clamp(18px, 5.5vw, 24px)'
+  const inputFs = density === 'compact' ? 'clamp(16px, 4vw, 18px)' : 'clamp(18px, 5.5vw, 24px)'
 
   // Compute display value length to drive dynamic expansion
   const displayValue = isActive && isTyping ? value : formatNumber(parseFloat(value) || 0, decimals)
@@ -51,8 +51,8 @@ export function CurrencyListRow({
 
   // Dynamic font size: shrink for very long numbers
   const valueFontSize =
-    len > 16 ? 'clamp(13px, 3.8vw, 17px)' :
-    len > 13 ? 'clamp(15px, 4.5vw, 20px)' :
+    len > 16 ? 'clamp(16px, 3.8vw, 17px)' :
+    len > 13 ? 'clamp(16px, 4.5vw, 20px)' :
     inputFs
 
   // collapseLevel: 0 = all visible, 1 = name hidden, 2 = +flag hidden
