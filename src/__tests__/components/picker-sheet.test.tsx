@@ -17,6 +17,7 @@ beforeEach(() => {
     rows: ['USD', 'EUR', 'GBP', 'JPY'],
     pickerOpen: true,
     showFlags: true,
+    rates: { USD: 1, EUR: 0.85, GBP: 0.73, JPY: 110, CHF: 0.92, CAD: 1.25, AUD: 1.35, CNY: 6.5, INR: 75, KRW: 1180 },
   })
 })
 
@@ -48,11 +49,8 @@ describe('PickerSheet', () => {
   })
 
   it('already-added currency shows check icon', async () => {
-    render(<PickerSheet />)
-    // USD is already in rows, so it should show a check mark
-    // The list shows all currencies; find USD row which should have check
     const { container } = render(<PickerSheet />)
-    // Check that USD button in the list is disabled (added=true means opacity 0.45)
+    // USD is already in rows — its button in the list should be disabled
     await waitFor(() => {
       const buttons = container.querySelectorAll('button[disabled]')
       expect(buttons.length).toBeGreaterThan(0)
@@ -71,5 +69,28 @@ describe('PickerSheet', () => {
     )
     // At least USD, EUR, GBP, JPY from popular chips should be disabled
     expect(disabledButtons.length).toBeGreaterThanOrEqual(4)
+  })
+
+  it('shows fallback display for currency not in config', () => {
+    useConverterStore.setState({
+      rows: [],
+      pickerOpen: true,
+      showFlags: true,
+      rates: { XYZ: 1.5 },
+    })
+    render(<PickerSheet />)
+    // The fallback row renders the code as the name; find the row subtitle which shows "XYZ · Unknown"
+    expect(screen.getByText(/XYZ · Unknown/)).toBeTruthy()
+  })
+
+  it('shows No currencies available when rates is empty', () => {
+    useConverterStore.setState({
+      rows: [],
+      pickerOpen: true,
+      showFlags: true,
+      rates: {},
+    })
+    render(<PickerSheet />)
+    expect(screen.getByText('No currencies available')).toBeTruthy()
   })
 })

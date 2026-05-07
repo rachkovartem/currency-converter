@@ -8,6 +8,13 @@ export interface Currency {
   country: string
 }
 
+export interface CurrencyConfig {
+  name: string
+  symbol: string
+  flag: string
+  country: string
+}
+
 export interface RecentConversion {
   from: CurrencyCode
   to: CurrencyCode

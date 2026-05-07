@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Search, X, Check, Plus } from 'lucide-react'
 import { useConverterStore } from '@/store/converter-store'
-import { CURRENCIES, CURRENCY_BY_CODE } from '@/lib/currencies'
+import { getCurrencyDisplay } from '@/lib/currencies'
 import { FlagAvatar } from '@/components/ui/flag-avatar'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
 
@@ -13,6 +13,7 @@ export function PickerSheet() {
   const addCurrency = useConverterStore(s => s.addCurrency)
   const rows = useConverterStore(s => s.rows)
   const showFlags = useConverterStore(s => s.showFlags)
+  const rates = useConverterStore(s => s.rates)
 
   const [query, setQuery] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -33,16 +34,21 @@ export function PickerSheet() {
     }
   }, [pickerOpen])
 
+  const allCurrencies = useMemo(
+    () => Object.keys(rates).map(code => getCurrencyDisplay(code)),
+    [rates]
+  )
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return CURRENCIES
-    return CURRENCIES.filter(
+    if (!q) return allCurrencies
+    return allCurrencies.filter(
       c =>
         c.code.toLowerCase().includes(q) ||
         c.name.toLowerCase().includes(q) ||
         c.country.toLowerCase().includes(q)
     )
-  }, [query])
+  }, [query, allCurrencies])
 
   const popular = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD']
 
@@ -154,8 +160,8 @@ export function PickerSheet() {
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {popular.map(code => {
-                const c = CURRENCY_BY_CODE[code]
-                if (!c) return null
+                if (!rates[code]) return null
+                const c = getCurrencyDisplay(code)
                 const added = rows.includes(code)
                 return (
                   <button
@@ -195,7 +201,18 @@ export function PickerSheet() {
           className="no-scrollbar"
           style={{ flex: 1, overflowY: 'auto', padding: '6px 20px 32px' }}
         >
-          {filtered.length === 0 ? (
+          {Object.keys(rates).length === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                color: 'var(--cc-text-muted)',
+                padding: '40px 0',
+                fontSize: 14,
+              }}
+            >
+              No currencies available
+            </div>
+          ) : filtered.length === 0 ? (
             <div
               style={{
                 textAlign: 'center',
