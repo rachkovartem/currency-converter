@@ -3,6 +3,7 @@
 import { LayoutList, LayoutGrid, Flag, Maximize2 } from 'lucide-react'
 import { useConverterStore } from '@/store/converter-store'
 import { BottomSheet } from '@/components/ui/bottom-sheet'
+import { version } from '@/lib/version'
 
 export function SettingsSheet() {
   const settingsOpen = useConverterStore(s => s.settingsOpen)
@@ -263,6 +264,21 @@ export function SettingsSheet() {
               }} />
             </button>
           </div>
+        </div>
+
+        {/* Version footer */}
+        <div
+          data-testid="app-version-label"
+          style={{
+            marginTop: 24,
+            textAlign: 'center',
+            fontSize: 11,
+            color: 'var(--cc-text-subtle)',
+            userSelect: 'none',
+            pointerEvents: 'none',
+          }}
+        >
+          {`v${version}`}
         </div>
       </div>
     </BottomSheet>

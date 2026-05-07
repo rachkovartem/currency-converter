@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { SettingsSheet } from '@/components/settings-sheet'
 import { useConverterStore } from '@/store/converter-store'
+import { version } from '@/lib/version'
 
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
@@ -18,6 +19,19 @@ beforeEach(() => {
     density: 'comfortable',
     showFlags: true,
     focusMode: false,
+  })
+})
+
+describe('SettingsSheet — Version label', () => {
+  it('renders the version label when the sheet is open', () => {
+    render(<SettingsSheet />)
+    expect(screen.getByTestId('app-version-label')).toBeTruthy()
+  })
+
+  it('displays the version from package.json prefixed with "v"', () => {
+    render(<SettingsSheet />)
+    const label = screen.getByTestId('app-version-label')
+    expect(label.textContent).toBe(`v${version}`)
   })
 })
 

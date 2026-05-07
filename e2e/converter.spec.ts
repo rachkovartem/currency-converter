@@ -56,6 +56,15 @@ test.describe('Converter — Main Features', () => {
   })
 
   test('AC-2: grid layout setting is persisted via cookie', async ({ page }) => {
+    // Wait for network idle before setting the cookie so that the rates fetch
+    // (fired by useRatesRefresh on mount) has already completed and the Zustand
+    // persist middleware has already called setItem(). Without this, the fetch
+    // response can arrive after addCookies() and the persist middleware's setItem()
+    // overwrites the layout:'grid' cookie with layout:'list' (the default for
+    // the beforeEach page.goto that runs without a layout cookie). The subsequent
+    // page.reload() would then send layout:'list' to the server.
+    await page.waitForLoadState('networkidle')
+
     // Use Playwright's native addCookies API to set the cookie atomically at the
     // browser-context level, bypassing document.cookie. This avoids a race condition
     // where a concurrent useEffect (Zustand persist setItem) could overwrite the
