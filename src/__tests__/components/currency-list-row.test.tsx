@@ -314,3 +314,42 @@ describe('CurrencyListRow', () => {
     })
   })
 })
+
+describe('decimal separator handling (iOS comma fix)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  // AC-1: comma produced by iOS decimal keyboard is accepted and normalized to dot
+  it('AC-1: comma as decimal separator is normalized to dot', () => {
+    const { getByTestId } = render(
+      <CurrencyListRow {...defaultProps} value="12" isActive={true} decimals={2} />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '12,5' } })
+    expect(defaultProps.onChange).toHaveBeenCalledWith('12.5')
+  })
+
+  // AC-2: dot decimal separator still works exactly as before (no regression)
+  it('AC-2: dot decimal separator still works', () => {
+    const { getByTestId } = render(
+      <CurrencyListRow {...defaultProps} value="12" isActive={true} decimals={2} />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '12.5' } })
+    expect(defaultProps.onChange).toHaveBeenCalledWith('12.5')
+  })
+
+  // AC-4: multiple decimal separators — only the first is preserved, extra dots removed
+  it('AC-4: multiple decimal separators collapsed to one', () => {
+    const { getByTestId } = render(
+      <CurrencyListRow {...defaultProps} value="12" isActive={true} decimals={2} />
+    )
+    const input = getByTestId('currency-input-USD') as HTMLInputElement
+    fireEvent.focus(input)
+    fireEvent.change(input, { target: { value: '12.5.6' } })
+    expect(defaultProps.onChange).toHaveBeenCalledWith('12.56')
+  })
+})

@@ -314,7 +314,9 @@ export function CurrencyListRow({
             }}
             onChange={(e) => {
               setIsTyping(true)
-              onChange(e.target.value.replace(/[^\d.]/g, ''))
+              const raw = e.target.value.replace(/,/g, '.').replace(/[^\d.]/g, '')
+              const [integer, ...rest] = raw.split('.')
+              onChange(rest.length > 0 ? `${integer}.${rest.join('')}` : integer)
             }}
             onBlur={() => setIsTyping(false)}
             inputMode="decimal"
